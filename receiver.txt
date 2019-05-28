@@ -1,0 +1,33 @@
+05-21 18:38:36.779 Receiver main BEGIN >>>>>>
+
+05-21 18:38:36.789 Receiver begin receive message ...
+05-21 18:38:41.261 Receiver end receive message ...
+05-21 18:38:41.261 Receiver 对方发送的消息：你好，接收方：0
+05-21 18:38:41.262 Receiver 对方的IP地址是：172.28.193.167
+05-21 18:38:41.262 Receiver 对方的端口号是：61215
+
+05-21 18:38:41.266 Receiver begin receive message ...
+05-21 18:38:41.268 Receiver end receive message ...
+05-21 18:38:41.268 Receiver 对方发送的消息：你好，接收方：1
+05-21 18:38:41.269 Receiver 对方的IP地址是：172.28.193.167
+05-21 18:38:41.269 Receiver 对方的端口号是：61215
+
+05-21 18:38:41.270 Receiver begin receive message ...
+05-21 18:38:41.272 Receiver end receive message ...
+05-21 18:38:41.272 Receiver 对方发送的消息：你好，接收方：2
+05-21 18:38:41.273 Receiver 对方的IP地址是：172.28.193.167
+05-21 18:38:41.274 Receiver 对方的端口号是：61215
+
+05-21 18:38:41.274 Receiver begin receive message ...
+05-21 18:38:41.276 Receiver end receive message ...
+05-21 18:38:41.276 Receiver 对方发送的消息：你好，接收方：3
+05-21 18:38:41.276 Receiver 对方的IP地址是：172.28.193.167
+05-21 18:38:41.277 Receiver 对方的端口号是：61215
+
+05-21 18:38:41.277 Receiver begin receive message ...
+05-21 18:38:41.279 Receiver end receive message ...
+05-21 18:38:41.279 Receiver 对方发送的消息：你好，接收方：4
+05-21 18:38:41.280 Receiver 对方的IP地址是：172.28.193.167
+05-21 18:38:41.281 Receiver 对方的端口号是：61215
+
+05-21 18:38:41.282 Receiver main END <<<<<<
