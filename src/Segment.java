@@ -4,6 +4,8 @@ public class Segment implements Comparable<Segment>{
 
     private String ack = "00000000000000000000000000000000";
 
+    private String time = "0000000000000000000000000000000000000000000000000000000000000000";
+
     //数据偏移字段
     private String Data_offset = "00000000";
 

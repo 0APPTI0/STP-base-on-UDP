@@ -1,12 +1,11 @@
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
+import java.io.*;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Sender {
     private InetAddress receiver_host_ip = InetAddress.getLocalHost();
@@ -52,27 +51,14 @@ public class Sender {
     private int ConnectionState = 0;
 
     //将文件以字节读入byte[]
-    public byte[] readFile(String fileName) {
-        String pathname = fileName; // 绝对路径或相对路径都可以，写入文件时演示相对路径,读取以上路径的input.txt文件
-        String result = "";
-        try (FileReader reader = new FileReader(pathname);
-             BufferedReader br = new BufferedReader(reader) // 建立一个对象，它把文件内容转成计算机能读懂的语言
-        ) {
-            String line;
-            //网友推荐更加简洁的写法
-            while ((line = br.readLine()) != null) {
-                // 一次读入一行数据
-                result = result + line + "\n";
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        System.out.println(result);
-
-        byte[] R = result.getBytes();
-
-        return R;
+    public static byte[] readFile(String filePath) throws IOException {
+        File file = new File(filePath);
+        int length = (int) file.length();
+        byte[] allData = new byte[length];
+        FileInputStream fileInputStream = new FileInputStream(file);
+        fileInputStream.read(allData);
+        fileInputStream.close();
+        return allData;
     }
 
     //将文件内容按照MSS，计算出每一个报文能够携带的文件内容长度，并且将它们塞进ArrayList<Segment> ContentList里
@@ -124,7 +110,6 @@ public class Sender {
     {
         try {
             sendSocket = new DatagramSocket(/*12341*/);
-            sendSocket.setSoTimeout(2000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -211,8 +196,6 @@ public class Sender {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
-
         }
     };
 
@@ -221,7 +204,7 @@ public class Sender {
     Thread ReceiveAck = new Thread(){
         @Override
         public void run() {
-            byte[] receivedAck = new byte[128];
+            byte[] receivedAck = new byte[196];
             DatagramPacket AckPackage = new DatagramPacket(receivedAck,receivedAck.length);
             try {
                 sendSocket.receive(AckPackage);
@@ -254,7 +237,14 @@ public class Sender {
     };
 
 
-
+    private void send() {
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        executorService.execute(SendSegment);
+        executorService.execute(ReceiveAck);
+        executorService.execute(ReSendSegment);
+        executorService.shutdown();
+        while (!executorService.isTerminated());
+    }
 
 
 
@@ -273,7 +263,7 @@ public class Sender {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Sender sender = null;
         try {
             sender = new Sender(12365,"testFile.txt",10,256,1.0,1.0,1.0);
@@ -281,14 +271,12 @@ public class Sender {
             e.printStackTrace();
         }
         sender.TextContent = sender.readFile(sender.fileName);
+        System.out.println(new String(sender.TextContent));
+
         sender.ContentList = sender.PacketContent();
         sender.EstablishConnection();
+        sender.send();
 
-        System.out.println(sender.ContentList);
-
-        sender.SendSegment.start();
-        sender.ReceiveAck.start();
-//        sender.ReSendSegment.start();
     }
 
 

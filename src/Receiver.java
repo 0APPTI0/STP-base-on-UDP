@@ -3,6 +3,8 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Receiver {
 
@@ -41,12 +43,23 @@ public class Receiver {
     {
         try {
             getSocket = new DatagramSocket(port, ip);
-            getSocket.setSoTimeout(2000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
     }
 
+
+
+
+    ArrayList<Segment> receivedSegment = new ArrayList<>();
+
+    ArrayList<String> toBeACKed = new ArrayList<>();
+
+
+
+
+
+    //三次握手建立连接
     public void EstablishConn(){
         // 确定接受方的IP和端口号，IP地址为本地机器地址
         try {
@@ -113,14 +126,10 @@ public class Receiver {
 
     }
 
-    ArrayList<Segment> receivedSegment = new ArrayList<>();
-
-    ArrayList<String> toBeACKed = new ArrayList<>();
-
     Thread ReceiveSegment = new Thread(){
         @Override
         public void run() {
-            byte[] receiveSegment = new byte[256];
+            byte[] receiveSegment = new byte[256+96];
             DatagramPacket receivedSegmentPacket = new DatagramPacket(receiveSegment,receiveSegment.length);
             try {
                 //TODO: 处理receive方法会线程阻塞的问题
@@ -154,6 +163,16 @@ public class Receiver {
     };
 
 
+    //开辟线程池
+    public void receiveData() {
+        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        executorService.execute(ReceiveSegment);
+        executorService.execute(SendACK);
+        executorService.shutdown();
+        while (!executorService.isTerminated()) ;
+    }
+
+
     public String SegmentHandle(){
         Collections.sort(receivedSegment);
         //取出每一个报文中携带的Text文本
@@ -169,8 +188,9 @@ public class Receiver {
     public static void main(String[] args) {
         Receiver receiver = new Receiver("1","1");
         receiver.EstablishConn();
-        receiver.ReceiveSegment.start();
-        receiver.SendACK.start();
+        receiver.receiveData();
+
+
         String receiveText = "";
         for (Segment segment:receiver.receivedSegment){
             receiveText += segment.getContent();
