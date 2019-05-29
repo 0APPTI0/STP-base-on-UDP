@@ -124,6 +124,7 @@ public class Sender {
     {
         try {
             sendSocket = new DatagramSocket(/*12341*/);
+            sendSocket.setSoTimeout(2000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -281,7 +282,7 @@ public class Sender {
         }
         sender.TextContent = sender.readFile(sender.fileName);
         sender.ContentList = sender.PacketContent();
-        //sender.EstablishConnection();
+        sender.EstablishConnection();
 
         System.out.println(sender.ContentList);
 

@@ -41,6 +41,7 @@ public class Receiver {
     {
         try {
             getSocket = new DatagramSocket(port, ip);
+            getSocket.setSoTimeout(2000);
         } catch (SocketException e) {
             e.printStackTrace();
         }
@@ -99,7 +100,7 @@ public class Receiver {
                 System.exit(1);
             }
 
-            getSocket.close();
+            //getSocket.close();
 
 
         } catch (UnknownHostException | SocketException e) {
@@ -168,5 +169,12 @@ public class Receiver {
     public static void main(String[] args) {
         Receiver receiver = new Receiver("1","1");
         receiver.EstablishConn();
+        receiver.ReceiveSegment.start();
+        receiver.SendACK.start();
+        String receiveText = "";
+        for (Segment segment:receiver.receivedSegment){
+            receiveText += segment.getContent();
+        }
+        System.out.println(receiveText);
     }
 }
