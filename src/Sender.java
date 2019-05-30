@@ -1,9 +1,6 @@
 import java.io.*;
 import java.net.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -26,13 +23,16 @@ public class Sender {
     private double pdrop;
 
     //The seed for your random number generator. The use of seed will be explained in Section 4.5.2 of the specification.
-    private double seed;
+    private long seed;
+
+
+    private  Log logger = new Log("sender_Log.txt", true);
 
     //滑动窗口的起始位置
-    private int startPoint = 0;
+    public int startPoint = 0;
 
     //滑动窗口的结束边界
-    private int endPoint = startPoint + this.MWS;
+    public int endPoint = startPoint + this.MWS;
 
     //滑动窗口 下一个带发送报文位置的指针
     private int sendPoint = 0;
@@ -43,12 +43,17 @@ public class Sender {
     //包装好的Segment 的list
     ArrayList<Segment> ContentList;
 
-
     /**系统状态
      * 0 表示断开连接
      * 1 表示建立连接
      */
     private int ConnectionState = 0;
+
+    private boolean isReceiving = false;
+
+    private boolean isSending = false;
+
+    private Random random;
 
     //将文件以字节读入byte[]
     public static byte[] readFile(String filePath) throws IOException {
@@ -64,36 +69,41 @@ public class Sender {
     //将文件内容按照MSS，计算出每一个报文能够携带的文件内容长度，并且将它们塞进ArrayList<Segment> ContentList里
     public ArrayList<Segment> PacketContent(){
         ArrayList<Segment> result = new ArrayList<>();
-        int contentInSegment = MSS - 128;
-        String tempContentString;
-        if (TextContent.length <= contentInSegment){
-            tempContentString = new String(TextContent);
-            Segment segment = new Segment();
-            segment.setSeq(1);
-            segment.setContent(tempContentString);
-            result.add(segment);
-            return result;
-        }
-        else {
+        int contentInSegment = MSS - 192;
+//        String tempContentString;
+//        //如果整个要发送的内容只需要一个报文就可以装下
+//        if (TextContent.length <= contentInSegment){
+//            tempContentString = new String(TextContent);
+//            Segment segment = new Segment();
+//            segment.setSeq(1);
+//            segment.setContent(tempContentString);
+//            segment.setData_offset(segment.Auto_completion(Integer.toBinaryString(segment.toString().length()),8));
+//            result.add(segment);
+//            return result;
+//        }
+        //分成很多个报文装
             //一个指针，指向待包装的数据的位置
-            int point = 0;
-            int Complete_Segment_Num = TextContent.length / contentInSegment;
-            int i;
-            for (i = 0; i < Complete_Segment_Num ; i++) {
-                Segment tempSegment = new Segment();
-                tempSegment.setSeq(i);
-                byte[] toBePackaged = Arrays.copyOfRange(TextContent,point,point+contentInSegment);
-                tempSegment.setContent(new String(toBePackaged));
-                point += contentInSegment;
-                result.add(tempSegment);
-            }
-            byte[] LastToBePackaged = Arrays.copyOfRange(TextContent,point,TextContent.length);
+        int point = 0;
+        int Complete_Segment_Num = TextContent.length / contentInSegment;
+        int i;
+        for (i = 0; i < Complete_Segment_Num ; i++) {
             Segment tempSegment = new Segment();
             tempSegment.setSeq(i);
-            tempSegment.setContent(new String(LastToBePackaged));
+            byte[] toBePackaged = Arrays.copyOfRange(TextContent,point,point+contentInSegment);
+            tempSegment.setContent(new String(toBePackaged));
+            //这里由于设计的失误导致记录报文的最大长度只有128；因此改为用十进制记录
+            tempSegment.setData_offset(tempSegment.Auto_completion(String.valueOf(tempSegment.toString().length()),8));
+            point += contentInSegment;
             result.add(tempSegment);
-            return result;
         }
+        byte[] LastToBePackaged = Arrays.copyOfRange(TextContent,point,TextContent.length);
+        Segment tempSegment = new Segment();
+        tempSegment.setSeq(i);
+        tempSegment.setContent(new String(LastToBePackaged));
+        tempSegment.setData_offset(tempSegment.Auto_completion(String.valueOf(tempSegment.toString().length()),8));
+        result.add(tempSegment);
+        return result;
+
 
     }
 
@@ -116,7 +126,7 @@ public class Sender {
     }
 
 
-    public void EstablishConnection(){
+    private void EstablishConnection(){
         try {
             // 确定发送方的IP地址及端口号，地址为本地机器地址
             int port = receiver_port;
@@ -129,7 +139,7 @@ public class Sender {
             FirstSegment.setSYN("1");
             FirstSegment.setSeq(2);
 
-            FirstSegment.show_Details(FirstSegment);
+//            FirstSegment.show_Details(FirstSegment);
 
             byte[] FirstBuffer = FirstSegment.toString().getBytes();
             // 构造数据报包，用来将长度为 length 的包发送到指定主机上的指定端口号
@@ -139,8 +149,8 @@ public class Sender {
 
             //第三次握手，接收Receiver发出来的反馈
 
-            // 确定接收反馈数据的缓冲存储器，即存储数据的字节数组
-            byte[] ThridShack = new byte[32*4];
+            // 确定接收反馈数据的缓冲存储器，即存储数据的字节数组;在这里为一个不含content的Segment的长度
+            byte[] ThridShack = new byte[192];
             // 确定接收类型的数据报
             DatagramPacket getPacket = new DatagramPacket(ThridShack, ThridShack.length);
             sendSocket.receive(getPacket);
@@ -148,7 +158,7 @@ public class Sender {
             Segment ThirdShack = new Segment();
             ThirdShack.Parsing_Message(backMsg);
 
-            ThirdShack.show_Details(ThirdShack);
+//            ThirdShack.show_Details(ThirdShack);
 
             if (!ThirdShack.getSYN().equals("1")|| !ThirdShack.getACK().equals("1") || Integer.parseInt(ThirdShack.getAck(),2)!= (Integer.parseInt(FirstSegment.getSeq(),2)+1)){
                 System.out.println("出错了");
@@ -168,7 +178,7 @@ public class Sender {
             DatagramPacket sendLastPacket = new DatagramPacket(LastSegmentBytes, LastSegmentBytes.length, ip, port);
             sendSocket.send(sendLastPacket);
 
-            LastSegment.show_Details(LastSegment);
+//            LastSegment.show_Details(LastSegment);
         } catch (SocketException e) {
             e.printStackTrace();
         } catch (UnknownHostException e) {
@@ -179,7 +189,10 @@ public class Sender {
         this.ConnectionState = 1;
     }
 
-    Thread SendSegment = new Thread(){
+
+    private ArrayList<Integer> toBeAcked = new ArrayList<>();
+
+    private Thread SendSegment = new Thread(){
         @Override
         public void run() {
             //TODO: 判断整个文件是否发送结束
@@ -189,47 +202,37 @@ public class Sender {
 //            }
             Segment toBeTransported = ContentList.get(sendPoint);
             sendPoint += 1;
-            byte[] buffer = toBeTransported.toString().getBytes();
-            DatagramPacket sendPacket = new DatagramPacket(buffer, buffer.length, receiver_host_ip, receiver_port);
-            try {
-                sendSocket.send(sendPacket);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            sendSegmentWithPLD(toBeTransported);
+            toBeAcked.add(Integer.parseInt(toBeTransported.getSeq()));
+
         }
     };
 
-    ArrayList<Integer> AckList = new ArrayList<>();
 
-    Thread ReceiveAck = new Thread(){
+    private Thread ReceiveAck = new Thread(){
         @Override
         public void run() {
-            byte[] receivedAck = new byte[196];
-            DatagramPacket AckPackage = new DatagramPacket(receivedAck,receivedAck.length);
-            try {
-                sendSocket.receive(AckPackage);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            Segment AckSegment = new Segment(new String(receivedAck));
-            AckList.add(Integer.parseInt(AckSegment.getAck(),2));
+            Segment AckSegment = receiveSegment();
+
+            toBeAcked.remove(Integer.parseInt(AckSegment.getAck(),2));
+
+            toBeAcked.sort(new Comparator<Integer>() {
+                @Override
+                public int compare(Integer o1, Integer o2) {
+                    return 01 > o2 ? 1 : -1;
+                }
+            });
+            startPoint = toBeAcked.get(0);
+            endPoint = (startPoint + MWS > ContentList.size())? (startPoint + MWS) : ContentList.size();
 
             //TODO 测试滑动窗口是否失败
-            Collections.sort(AckList);
 
-            for (int i : AckList){
-                if (i == startPoint){
-                    AckList.remove(i);
-                    startPoint ++;
-                    endPoint = startPoint + MWS;
-                }
-            }
         }
     };
 
 
 
-    Thread ReSendSegment = new Thread(){
+    private Thread ReSendSegment = new Thread(){
         @Override
         public void run() {
 
@@ -247,11 +250,60 @@ public class Sender {
     }
 
 
+    private void finishSend(){
+
+    }
+
+
+    public void sendSegmentWithPLD(Segment segment){
+        long timestamp = System.nanoTime();
+        segment.setTime(String.valueOf(timestamp));
+        //TODO 需要将这里的判断逻辑修改为带有PLD逻辑的判断
+        if (/*random.nextDouble() > pdrop*/
+                true) {
+            try {
+                sendSocket.send(toDatagramPacket(segment,receiver_host_ip, receiver_port));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+//            sentSeq.add(segment.getSeq());
+//            logger.log(segment, Log.Type.SND, timestamp);
+        } else {
+//            logger.log(segment, Log.Type.DROP, timestamp);
+        }
+//        cache.addLast(segment);
+    }
+
+
+
+    public Segment receiveSegment(){
+        //事先开辟一个足够大的数组
+        byte[] receiveSegment = new byte[1024+192];
+        DatagramPacket receivedSegmentPacket = new DatagramPacket(receiveSegment,receiveSegment.length);
+        try {
+            sendSocket.receive(receivedSegmentPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String StringSegment = new String(receiveSegment);
+
+        //采取自动截断功能，去除后面的空数组
+        Segment segment = new Segment(StringSegment);
+        int segmentLength = Integer.parseInt(segment.getData_offset());
+        Segment trueSegment = new Segment(StringSegment.substring(0,segmentLength));
+        return trueSegment;
+    }
+
+
+    public DatagramPacket toDatagramPacket(Segment segment, InetAddress address, int port) throws IOException {
+        byte[] array = segment.toString().getBytes();
+        return new DatagramPacket(array, array.length, address, port);
+    }
 
 
 
     //构造方法
-    public Sender(/*String receiver_host_ip,*/ int receiver_port, String fileName, int mws, int mss, double timeout, double pdrop, double seed) throws UnknownHostException {
+    public Sender(/*String receiver_host_ip,*/ int receiver_port, String fileName, int mws, int mss, double timeout, double pdrop, long seed) throws UnknownHostException {
         //this.receiver_host_ip = receiver_host_ip;
         this.receiver_port = receiver_port;
         this.fileName = fileName;
@@ -266,12 +318,16 @@ public class Sender {
     public static void main(String[] args) throws IOException {
         Sender sender = null;
         try {
-            sender = new Sender(12365,"testFile.txt",10,256,1.0,1.0,1.0);
+            sender = new Sender(12365,"testFile.txt",10,256,1.0,0.5,2);
+            sender.random = new Random(sender.seed);
+            if (sender.MSS>1024){
+                System.out.println("MSS太大");
+            }
         } catch (UnknownHostException e) {
             e.printStackTrace();
         }
         sender.TextContent = sender.readFile(sender.fileName);
-        System.out.println(new String(sender.TextContent));
+//        System.out.println(new String(sender.TextContent));
 
         sender.ContentList = sender.PacketContent();
         sender.EstablishConnection();

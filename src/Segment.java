@@ -4,9 +4,7 @@ public class Segment implements Comparable<Segment>{
 
     private String ack = "00000000000000000000000000000000";
 
-    private String time = "0000000000000000000000000000000000000000000000000000000000000000";
-
-    //数据偏移字段
+    //数据偏移字段,存放报文的长度
     private String Data_offset = "00000000";
 
     //若为ACK报文，则该值为1，否则为0
@@ -26,9 +24,12 @@ public class Segment implements Comparable<Segment>{
 
     private String Filling = "000000000000000000000000";
 
+    private String time = "0000000000000000000000000000000000000000000000000000000000000000";
+
     private String Content = "";
 
 
+    //-------------------------------构造方法------------------------------------//
     public Segment(){
     }
 
@@ -36,10 +37,14 @@ public class Segment implements Comparable<Segment>{
         this.Parsing_Message(message);
     }
 
+
+    //-------------------------------应用方法------------------------------------//
+
+
     /**一些应该存在的字段的拆分、处理的方法
      */
     public String toString(){
-        return this.seq + this.ack + this.Data_offset + this.ACK + this.SYN + this.FIN + this.reversed + this.Checksum + this.Option + this.Filling + this.Content;
+        return this.seq + this.ack + this.Data_offset + this.ACK + this.SYN + this.FIN + this.reversed + this.Checksum + this.Option + this.Filling + this.time + this.Content;
     }
 
 
@@ -60,7 +65,7 @@ public class Segment implements Comparable<Segment>{
 
     /**
      * @param ToBeHandled
-     * @return 解析后的对象
+     * @return 将输入的字符串转换为参数存入Segment对象
      */
     public void Parsing_Message(String ToBeHandled){
         this.setSeq(ToBeHandled.substring(0,32));
@@ -73,8 +78,9 @@ public class Segment implements Comparable<Segment>{
         this.setChecksum(ToBeHandled.substring(80,96));
         this.setOption(ToBeHandled.substring(96,104));
         this.setFilling(ToBeHandled.substring(104,128));
-        if (ToBeHandled.length()>128) {
-            this.setContent(ToBeHandled.substring(128));
+        this.setTime(ToBeHandled.substring(128,192));
+        if (ToBeHandled.length()>192) {
+            this.setContent(ToBeHandled.substring(192));
         }
     }
 
@@ -82,11 +88,6 @@ public class Segment implements Comparable<Segment>{
     public void ack_Equals_Seq_Plus_One(){
         this.setAck(this.Auto_completion(Integer.toBinaryString(Integer.parseInt(this.getSeq(),2)+1),32));
     }
-
-
-
-
-
 
 
     public void show_Details(Segment segment){
@@ -98,13 +99,19 @@ public class Segment implements Comparable<Segment>{
         System.out.println(segment.getFIN()+" FIN");
         System.out.println(segment.getReversed()+" 长度为"+segment.getSeq().length());
         System.out.println(segment.getChecksum()+" 值为"+Integer.parseInt(segment.getSeq(),2)+" 长度为"+segment.getSeq().length());
-        System.out.println(segment.getOption()+" 长度为"+segment.getSeq().length());
-        System.out.println(segment.getFilling()+" 长度为"+segment.getSeq().length());
-        System.out.println(segment.getContent()+" 长度为"+segment.getSeq().length());
+        System.out.println(segment.getOption()+" 长度为"+segment.getOption().length());
+        System.out.println(segment.getFilling()+" 长度为"+segment.getFilling().length());
+        System.out.println(segment.getTime()+" 长度为"+segment.getTime().length());
+        System.out.println(segment.getContent()+" 长度为"+segment.getContent().length());
+        System.out.println("报文总长度为："+segment.toString().length());
         System.out.println("----------------------------");
     }
 
-
+    /**
+     * 将报文可以按照seq的大小来比较
+     * @param o
+     * @return
+     */
     @Override
     public int compareTo(Segment o) {
         return Integer.parseInt(this.getSeq())>Integer.parseInt(o.getSeq()) ? 1:-1;
@@ -114,6 +121,7 @@ public class Segment implements Comparable<Segment>{
 
 
 
+    //-------------------------------getter & setter------------------------------------//
 
     public String getSeq() {
         return seq;
@@ -212,4 +220,11 @@ public class Segment implements Comparable<Segment>{
     }
 
 
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
 }

@@ -33,13 +33,16 @@ public class Receiver {
 
     private int ConnectionState = 0;
 
+    private boolean isReceiving = true;
+
+    private boolean isSending = false;
+
 
     //在收到信息之后，接收方可以根据发送方的相关信息得到发送方的Address。
-    SocketAddress sendAddress ;
+    private SocketAddress sendAddress ;
 
 
-    DatagramSocket getSocket;
-
+    private DatagramSocket getSocket;
     {
         try {
             getSocket = new DatagramSocket(port, ip);
@@ -49,11 +52,9 @@ public class Receiver {
     }
 
 
+    private ArrayList<Segment> receivedSegment = new ArrayList<>();
 
-
-    ArrayList<Segment> receivedSegment = new ArrayList<>();
-
-    ArrayList<String> toBeACKed = new ArrayList<>();
+    private ArrayList<String> toBeACKed = new ArrayList<>();
 
 
 
@@ -65,7 +66,7 @@ public class Receiver {
         try {
 
             //接收第一次握手，并对发送端进行第二次握手
-            byte[] buf = new byte[32*4];
+            byte[] buf = new byte[192];
             DatagramPacket getPacket = new DatagramPacket(buf, buf.length);
             getSocket.receive(getPacket);
             String getMes = new String(buf, 0, getPacket.getLength());
@@ -74,7 +75,7 @@ public class Receiver {
             this.sendAddress= getPacket.getSocketAddress();
             Segment SecondShack = segment;
 
-            SecondShack.show_Details(SecondShack);
+//            SecondShack.show_Details(SecondShack);
 
             if (!SecondShack.getSYN().equals("1")){
                 System.out.println("出错了！");
@@ -99,13 +100,13 @@ public class Receiver {
 
 
             Segment LastSegment = null;
-            byte[] buffer = new byte[32*4];
+            byte[] buffer = new byte[192];
             DatagramPacket getLastPacket = new DatagramPacket(buffer, buffer.length);
             getSocket.receive(getLastPacket);
             String getLastMes = new String(buffer);
             LastSegment = new Segment();
             LastSegment.Parsing_Message(getLastMes);
-            LastSegment.show_Details(LastSegment);
+//            LastSegment.show_Details(LastSegment);
 
             if (!LastSegment.getSYN().equals("0")|| !LastSegment.getACK().equals("1") || Integer.parseInt(LastSegment.getSeq(),2) != Integer.parseInt(SecondShack.getAck(),2) || Integer.parseInt(LastSegment.getAck(),2)!= (Integer.parseInt(SecondShack.getSeq(),2)+1)
             ){
@@ -113,7 +114,6 @@ public class Receiver {
                 System.exit(1);
             }
 
-            //getSocket.close();
 
 
         } catch (UnknownHostException | SocketException e) {
@@ -126,21 +126,17 @@ public class Receiver {
 
     }
 
+
+
+
     Thread ReceiveSegment = new Thread(){
         @Override
         public void run() {
-            byte[] receiveSegment = new byte[256+96];
-            DatagramPacket receivedSegmentPacket = new DatagramPacket(receiveSegment,receiveSegment.length);
-            try {
-                //TODO: 处理receive方法会线程阻塞的问题
-                getSocket.receive(receivedSegmentPacket);
-            } catch (IOException e) {
-                e.printStackTrace();
+            Segment segment = receiveSegment();
+            while (isReceiving) {
+                receivedSegment.add(segment);
+                toBeACKed.add(segment.getSeq());
             }
-            String StringSegment = new String(receiveSegment);
-            Segment segment = new Segment(StringSegment);
-            receivedSegment.add(segment);
-            toBeACKed.add(segment.getSeq());
         }
     };
 
@@ -151,7 +147,6 @@ public class Receiver {
                 Segment AckSegment = new Segment();
                 AckSegment.setAck(AckString);
                 byte[] AckSegmentBytes = AckSegment.toString().getBytes();
-                //TODO 这里可能有问题；IP和PORT可能会出问题
                 DatagramPacket AckSegmentPacket = new DatagramPacket(AckSegmentBytes,AckSegmentBytes.length,ip,port);
                 try {
                     getSocket.send(AckSegmentPacket);
@@ -165,12 +160,33 @@ public class Receiver {
 
     //开辟线程池
     public void receiveData() {
-        ExecutorService executorService = Executors.newFixedThreadPool(3);
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
         executorService.execute(ReceiveSegment);
         executorService.execute(SendACK);
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
     }
+
+
+
+    public Segment receiveSegment(){
+        //事先开辟一个足够大的数组
+        byte[] receiveSegment = new byte[1024+192];
+        DatagramPacket receivedSegmentPacket = new DatagramPacket(receiveSegment,receiveSegment.length);
+        try {
+            getSocket.receive(receivedSegmentPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String StringSegment = new String(receiveSegment);
+
+        //采取自动截断功能，去除后面的空数组
+        Segment segment = new Segment(StringSegment);
+        int segmentLength = Integer.parseInt(segment.getData_offset());
+        Segment trueSegment = new Segment(StringSegment.substring(0,segmentLength));
+        return trueSegment;
+    }
+
 
 
     public String SegmentHandle(){
@@ -196,5 +212,6 @@ public class Receiver {
             receiveText += segment.getContent();
         }
         System.out.println(receiveText);
+
     }
 }
