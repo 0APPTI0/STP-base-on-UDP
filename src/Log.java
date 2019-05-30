@@ -59,9 +59,9 @@ public class Log {
             segType += "A";
         }
         builder.append(segType).append(" ");
-        builder.append(segment.getSeq()).append(" ");
+        builder.append(Integer.parseInt(segment.getSeq(),2)).append(" ");
         builder.append(segment.getContent().length()).append(" ");
-        builder.append(segment.getAck());
+        builder.append(Integer.parseInt(segment.getAck(),2));
 
         printWriter.println(builder.toString());
 

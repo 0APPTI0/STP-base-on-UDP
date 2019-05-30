@@ -128,6 +128,8 @@ public class Sender {
 
     private void EstablishConnection(){
         try {
+            logger.start();
+
             // 确定发送方的IP地址及端口号，地址为本地机器地址
             int port = receiver_port;
             InetAddress ip = receiver_host_ip;
@@ -186,7 +188,8 @@ public class Sender {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        this.ConnectionState = 1;
+        this.isSending = true;
+        this.isReceiving = false;
     }
 
 
@@ -195,16 +198,23 @@ public class Sender {
     private Thread SendSegment = new Thread(){
         @Override
         public void run() {
-            //TODO: 判断整个文件是否发送结束
+            while (isSending) {
+                //TODO: 判断整个文件是否发送结束
 //            if (sendPoint == ContentList.size()){
 //                sendSocket.close();
 //                return;
 //            }
-            Segment toBeTransported = ContentList.get(sendPoint);
-            sendPoint += 1;
-            sendSegmentWithPLD(toBeTransported);
-            toBeAcked.add(Integer.parseInt(toBeTransported.getSeq()));
-
+                Segment toBeTransported = ContentList.get(sendPoint);
+                synchronized (currentThread()) {
+                    sendPoint += 1;
+                    //TODO 需要改用滑动窗口来进行判读
+                    if (sendPoint == ContentList.size()) {
+                        isSending = false;
+                    }
+                    sendSegmentWithPLD(toBeTransported);
+                    toBeAcked.add(Integer.parseInt(toBeTransported.getSeq()));
+                }
+            }
         }
     };
 
@@ -212,21 +222,25 @@ public class Sender {
     private Thread ReceiveAck = new Thread(){
         @Override
         public void run() {
-            Segment AckSegment = receiveSegment();
+            while (isReceiving && !interrupted()) {
 
-            toBeAcked.remove(Integer.parseInt(AckSegment.getAck(),2));
+                Segment AckSegment = receiveSegment();
 
-            toBeAcked.sort(new Comparator<Integer>() {
-                @Override
-                public int compare(Integer o1, Integer o2) {
-                    return 01 > o2 ? 1 : -1;
+                synchronized (currentThread()) {
+                    toBeAcked.remove(Integer.parseInt(AckSegment.getAck(), 2));
+
+                    toBeAcked.sort(new Comparator<Integer>() {
+                        @Override
+                        public int compare(Integer o1, Integer o2) {
+                            return 01 > o2 ? 1 : -1;
+                        }
+                    });
+                    startPoint = toBeAcked.get(0);
+                    endPoint = (startPoint + MWS > ContentList.size()) ? (startPoint + MWS) : ContentList.size();
+
+                    //TODO 测试滑动窗口是否已经失效
                 }
-            });
-            startPoint = toBeAcked.get(0);
-            endPoint = (startPoint + MWS > ContentList.size())? (startPoint + MWS) : ContentList.size();
-
-            //TODO 测试滑动窗口是否失败
-
+            }
         }
     };
 
@@ -235,6 +249,11 @@ public class Sender {
     private Thread ReSendSegment = new Thread(){
         @Override
         public void run() {
+
+            while (isReceiving) {
+                // TODO
+                if (!isSending) {isReceiving = false; ReceiveAck.interrupt();}
+            }
 
         }
     };
@@ -266,12 +285,11 @@ public class Sender {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-//            sentSeq.add(segment.getSeq());
-//            logger.log(segment, Log.Type.SND, timestamp);
+            logger.log(segment, Log.Type.SND, timestamp);
         } else {
-//            logger.log(segment, Log.Type.DROP, timestamp);
+            logger.log(segment, Log.Type.DROP, timestamp);
         }
-//        cache.addLast(segment);
+
     }
 
 
@@ -285,12 +303,14 @@ public class Sender {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        long timestamp = System.nanoTime();
         String StringSegment = new String(receiveSegment);
-
         //采取自动截断功能，去除后面的空数组
         Segment segment = new Segment(StringSegment);
         int segmentLength = Integer.parseInt(segment.getData_offset());
         Segment trueSegment = new Segment(StringSegment.substring(0,segmentLength));
+
+        logger.log(trueSegment, Log.Type.RCV, timestamp);
         return trueSegment;
     }
 
@@ -327,11 +347,12 @@ public class Sender {
             e.printStackTrace();
         }
         sender.TextContent = sender.readFile(sender.fileName);
-//        System.out.println(new String(sender.TextContent));
 
         sender.ContentList = sender.PacketContent();
         sender.EstablishConnection();
         sender.send();
+
+        sender.logger.close();
 
     }
 
