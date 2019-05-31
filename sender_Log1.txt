@@ -1,15 +1,24 @@
 <snd/rcv/drop> <time> <type of packet> <seq-number> <number-of- bytes> <ack-number>
-SND        7.635      D                   0                512        0
-SND        40.033      D                   1                512        0
-SND        40.345      D                   2                512        0
-SND        40.775      D                   3                512        0
-SND        5055.219      F                   67                0        0
-RCV        5055.799      A                   0                0        0
-RCV        5056.071      A                   0                0        1
-SND        5056.325      A                   68                0        1
-===================================
-Amount of (original) Data Transferred (in bytes): 2620
-Number of Data Segments Sent (excluding retransmissions): 4
-Number of (all) Packets Dropped (by the PLD module): 0
-Number of Retransmitted Segments: 0
-Number of Duplicate Acknowledgements received: 0
+SND        5.893      D                   0                512        0
+SND        41.400      D                   1                512        0
+DROP        41.750      D                   2                512        0
+SND        41.928      D                   3                512        0
+SND        42.147      D                   4                512        0
+SND        42.356      D                   5                512        0
+DROP        42.563      D                   6                512        0
+DROP        42.724      D                   7                512        0
+SND        42.890      D                   8                77        0
+RCV        53.359      A                   0                0        0
+RCV        55.041      A                   0                0        1
+RCV        55.334      A                   0                0        3
+RCV        55.610      A                   0                0        4
+RCV        55.856      A                   0                0        5
+RCV        56.095      A                   0                0        8
+SND        3009.731      D                   2                512        0
+DROP        3010.147      D                   6                512        0
+RCV        3010.378      A                   0                0        2
+SND        3010.483      D                   7                512        0
+RCV        3010.956      A                   0                0        7
+SND        4015.528      D                   6                512        0
+RCV        4016.070      A                   0                0        6
+SND        5019.747      F                   67                0        0

@@ -63,7 +63,7 @@ public class Receiver {
     Thread SendACK = new Thread(){
         @Override
         public void run() {
-            while (isSending) {
+            while (isSending && ! interrupted()) {
                 if (toBeACKed.size() != 0) {
                     for (String AckString : toBeACKed) {
                         Segment AckSegment = new Segment();
@@ -82,7 +82,7 @@ public class Receiver {
 
         @Override
         public void run() {
-            while (isReceiving) {
+            while (isReceiving && ! interrupted()) {
                 Segment segment = receiveSegment();
                 synchronized (currentThread()) {
                     if ("1".equals(segment.getFIN())){
@@ -185,6 +185,10 @@ public class Receiver {
     public void finReceive(){
         this.isReceiving = false;
         this.isSending = false;
+        this.ReceiveSegment.interrupt();
+        this.SendACK.interrupt();
+
+
         Segment segment0 = receiveSegment();
         Segment segment1 = new Segment();
         segment1.setACK("1");

@@ -79,7 +79,7 @@ public class Log {
 //        }
         printWriter.flush();
 
-        System.out.println(builder.toString());
+//        System.out.println(builder.toString());
 
 
         switch (type) {

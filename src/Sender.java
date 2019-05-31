@@ -125,6 +125,7 @@ public class Sender {
     }
 
 
+
     private CopyOnWriteArrayList<Integer> toBeAcked = new CopyOnWriteArrayList<>();
 
     private CopyOnWriteArrayList<Segment> toBeAcked_Segment_list = new CopyOnWriteArrayList<>();
@@ -134,36 +135,37 @@ public class Sender {
     private Thread SendSegment = new Thread(){
         @Override
         public void run() {
-            while (isSending) {
-                //TODO: 判断整个文件是否发送结束
-//            if (sendPoint == ContentList.size()){
-//                sendSocket.close();
-//                return;
-//            }
+            while (isSending && ! interrupted()) {
+
                 Segment toBeTransported = ContentList.get(sendPoint);
                 synchronized (currentThread()) {
+
+
                     sendPoint += 1;
-                    //TODO 如果达到了滑动窗口的最大值，那么应该休眠一段时间；等接收的线程收到ACK继续往前推进
-                    if (sendPoint >= endPoint) {
+                    if (sendPoint == ContentList.size()){
+                        isSending = false;
+                    }
+                    //TODO 如果达到了滑动窗口的最大值，那么应该休眠一段时间；等接收的线程收到ACK,让滑动窗口继续往前推进
+                    if (sendPoint > endPoint) {
 //                        try {
 //                            currentThread().wait();
 //                        } catch (InterruptedException e) {
 //                            e.printStackTrace();
 //                        }
 //                        try {
-//                            Thread.sleep(1000);
+//                            Thread.sleep(5000);
 //                        } catch (InterruptedException e) {
 //                            e.printStackTrace();
 //                        }
+                        continue;
                     }
                     else {
-                        sendSegmentWithPLD(toBeTransported);
-                        toBeAcked.add(Integer.parseInt(toBeTransported.getSeq()));
-                        toBeAcked_Segment_list.add(toBeTransported);
-                        toBeAcked_Segment.put(Integer.parseInt(toBeTransported.getSeq()), toBeTransported);
-                    }
-                    if (sendPoint == ContentList.size()){
-                        isSending = false;
+                        try {
+                            sendSegmentWithPLD(toBeTransported);
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
                     }
                 }
             }
@@ -174,31 +176,36 @@ public class Sender {
     private Thread ReceiveAck = new Thread(){
         @Override
         public void run() {
-            while (isReceiving && !interrupted()) {
+            while (isReceiving && ! interrupted()) {
 
                 Segment AckSegment = receiveSegment();
 
                 synchronized (currentThread()) {
-                    toBeAcked.remove(Integer.parseInt(AckSegment.getAck(), 2));
-                    toBeAcked_Segment_list.remove(toBeAcked_Segment.get(Integer.parseInt(AckSegment.getAck(), 2)));
+                    toBeAcked.remove((Integer) Integer.parseInt(AckSegment.getAck(), 2));
+//                    toBeAcked_Segment_list.remove(toBeAcked_Segment.get(Integer.parseInt(AckSegment.getAck(), 2)));
+                    for (Segment segment:toBeAcked_Segment_list){
+                        if (segment.getSeq().equals(AckSegment.getAck())){
+                            toBeAcked_Segment_list.remove(segment);
+                        }endPoint = (startPoint + MWS > ContentList.size()) ? ContentList.size():(startPoint + MWS)  ;
+                    }
+
                     toBeAcked_Segment.remove(Integer.parseInt(AckSegment.getAck(), 2));
                     toBeAcked.sort(new Comparator<Integer>() {
                         @Override
                         public int compare(Integer o1, Integer o2) {
-                            return 01 > o2 ? 1 : -1;
+                            return o1 > o2 ? 1 : -1;
                         }
                     });
-                    if (toBeAcked.get(0) > startPoint) {
+                    if (toBeAcked.size()!=0 && toBeAcked.get(0) > startPoint) {
                         startPoint = toBeAcked.get(0);
-
+                        endPoint = (startPoint + MWS > ContentList.size()) ? ContentList.size():(startPoint + MWS)  ;
                         //TODO 滑动窗口向前滑动，归还线程使用权
-                        //currentThread().notify();
+//                        currentThread().notifyAll();
                     }
-                    endPoint = (startPoint + MWS > ContentList.size()) ? (startPoint + MWS) : ContentList.size();
-                    if (toBeAcked.size() == 0){
+
+                    if (toBeAcked.size() == 0 && !isSending){
                         isReceiving = false;
-                        isSending = false;
-                        allDone = true;
+                        ReceiveAck.interrupt();
                     }
                 }
             }
@@ -211,11 +218,17 @@ public class Sender {
         @Override
         public void run() {
 
-            while (isReceiving) {
+            while (isReceiving && ! interrupted()) {
                 if (toBeAcked.size() != 0){
                     synchronized (currentThread()) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
                         //不断检查所有待收到ACK的报文是否已经收到ACK
                         for (Segment segment : toBeAcked_Segment_list){
+                            System.out.println(Integer.parseInt(segment.getSeq(),2));
                             if ((System.nanoTime() - Long.parseLong(segment.getTime())) / 1000000 > timeout){
                                 try {
                                     sendSegmentWithPLD(segment, Log.AdditionalType.RETRANS);
@@ -224,13 +237,18 @@ public class Sender {
                                 }
                             }
                         }
-
+                        if (toBeAcked_Segment_list.size() ==0 && !isSending){
+                            allDone = true;
+                        }
 
                     }
                 }
-                else if (allDone) {
-                    isReceiving = false; ReceiveAck.interrupt();
+                if (allDone) {
+                    isReceiving = false;
                     isSending = false;
+                    ReSendSegment.interrupt();
+                    ReceiveAck.interrupt();
+                    SendSegment.interrupt();
                 }
             }
 
@@ -298,7 +316,7 @@ public class Sender {
             e.printStackTrace();
         }
         this.isSending = true;
-        this.isReceiving = false;
+        this.isReceiving = true;
     }
 
     private void send() {
@@ -308,11 +326,14 @@ public class Sender {
         executorService.execute(ReSendSegment);
         executorService.shutdown();
         while (!executorService.isTerminated());
+
+        System.out.println("===========================================");
+
     }
 
     private void finishSend(){
-        this.isReceiving = false;
         this.isSending = false;
+        this.isReceiving = false;
         Segment segment0 = new Segment();
         segment0.setFIN("1");
         segment0.setSeq(67);
@@ -339,17 +360,16 @@ public class Sender {
         logger.log(segment, Log.Type.SND, timestamp);
     }
 
-    public void sendSegmentWithPLD(Segment segment){
+    public void sendSegmentWithPLD(Segment segment) throws IOException {
         long timestamp = System.nanoTime();
         segment.setTime(String.valueOf(timestamp));
-        //TODO 需要将这里的判断逻辑修改为带有PLD逻辑的判断
-        if (/*random.nextDouble() > pdrop*/
-                true) {
-            try {
-                sendSocket.send(toDatagramPacket(segment,ip, Receive_port));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        if (!toBeAcked.contains(Integer.parseInt(segment.getSeq(),2))) {
+            toBeAcked.add(Integer.parseInt(segment.getSeq(), 2));
+            toBeAcked_Segment_list.add(segment);
+            toBeAcked_Segment.put(Integer.parseInt(segment.getSeq()), segment);
+        }
+        if (random.nextDouble() > pdrop) {
+            sendSocket.send(toDatagramPacket(segment,ip,Receive_port));
             logger.log(segment, Log.Type.SND, timestamp);
         } else {
             logger.log(segment, Log.Type.DROP, timestamp);
@@ -359,12 +379,12 @@ public class Sender {
 
     private void sendSegmentWithPLD(Segment segment, Log.AdditionalType type) throws IOException {
         long timestamp = System.nanoTime();
-        segment.setTime(String.valueOf(timestamp));
+//        segment.setTime(String.valueOf(timestamp));
+//        toBeAcked.add(Integer.parseInt(segment.getSeq(),2));
+//        toBeAcked_Segment_list.add(segment);
+//        toBeAcked_Segment.put(Integer.parseInt(segment.getSeq()), segment);
         if (random.nextDouble() > pdrop) {
-            sendSocket.send(toDatagramPacket(segment,ip,this.Receive_port));
-            toBeAcked.add(Integer.parseInt(segment.getSeq(),2));
-            toBeAcked_Segment_list.add(segment);
-            toBeAcked_Segment.put(Integer.parseInt(segment.getSeq(),2),segment);
+            sendSocket.send(toDatagramPacket(segment,ip,Receive_port));
             logger.log(segment, Log.Type.SND, type, timestamp);
         } else {
             logger.log(segment, Log.Type.DROP, type, timestamp);
@@ -414,7 +434,7 @@ public class Sender {
     public static void main(String[] args) throws IOException {
         Sender sender = null;
         try {
-            sender = new Sender(2222,"testFile.txt",5,192+512,1.0,0.5,2);
+            sender = new Sender(2222,"testFile.txt",10,192+512,2000.0,0.5,2);
             sender.random = new Random(sender.seed);
             if (sender.MSS>1024){
                 System.out.println("MSS太大");
@@ -428,7 +448,6 @@ public class Sender {
         sender.EstablishConnection();
         sender.send();
         sender.finishSend();
-
         sender.logger.close();
 
     }

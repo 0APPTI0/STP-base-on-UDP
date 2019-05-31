@@ -2,7 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fca34fd5-2518-443e-9129-6fd10ffeaed9" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/receiver_Log1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/receiver_Log1.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sender_Log1.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sender_Log1.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Log.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Log.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Receiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Receiver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Sender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sender.java" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -27,74 +31,45 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Sender.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-425">
-              <caret line="193" column="47" selection-start-line="193" selection-start-column="47" selection-end-line="193" selection-end-column="47" />
+            <state relative-caret-position="-2755">
+              <caret line="63" column="32" lean-forward="true" selection-start-line="63" selection-start-column="32" selection-end-line="63" selection-end-column="32" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="method#getContent#0;class#Sender#0" />
                 <element signature="method#PacketContent#0;class#Sender#0" />
-                <element signature="e#2105#2140#0" />
                 <element signature="docComment;field#sendSocket#0;class#Sender#0" />
-                <element signature="e#4168#4212#0" />
-                <element signature="e#4417#5933#0" expanded="true" />
-                <element signature="e#6644#6664#0" />
-                <element signature="e#5932#5933#0" expanded="true" />
-                <element signature="e#5737#7001#0" expanded="true" />
-                <element signature="class#7391:7563" />
-                <element signature="e#6061#6062#0" expanded="true" />
-                <element signature="e#6140#6141#0" expanded="true" />
-                <element signature="e#7000#7001#0" expanded="true" />
-                <element signature="e#6497#8267#0" expanded="true" />
-                <element signature="e#8266#8267#0" expanded="true" />
+                <element signature="e#4418#5728#0" expanded="true" />
+                <element signature="e#5727#5728#0" expanded="true" />
+                <element signature="e#5764#7430#0" expanded="true" />
+                <element signature="e#6775#6776#0" expanded="true" />
+                <element signature="e#6854#6855#0" expanded="true" />
+                <element signature="e#7429#7430#0" expanded="true" />
+                <element signature="e#7470#8759#0" expanded="true" />
+                <element signature="e#8758#8759#0" expanded="true" />
                 <element signature="method#EstablishConnection#0;class#Sender#0" />
-                <element signature="method#finishSend#0;class#Sender#0" />
                 <element signature="method#sendSegment#0;class#Sender#0" />
-                <element signature="e#9643#9695#0" />
                 <element signature="method#sendSegmentWithPLD#0;class#Sender#0" />
-                <element signature="e#9219#9289#1" />
+                <element signature="method#sendSegmentWithPLD#1;class#Sender#0" />
                 <element signature="method#receiveSegment#0;class#Sender#0" />
-                <element signature="method#toDatagramPacket#0;class#Sender#0" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/sender_Log1.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="225">
-              <caret line="15" selection-start-line="15" selection-end-line="15" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/receiver_Log1.txt">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="150">
-              <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
+      <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/Receiver.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="178">
-              <caret line="74" column="17" lean-forward="true" selection-start-line="179" selection-start-column="24" selection-end-line="179" selection-end-column="32" />
+            <state relative-caret-position="123">
+              <caret line="201" column="65" lean-forward="true" selection-start-line="201" selection-start-column="65" selection-end-line="201" selection-end-column="65" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#1429#1855#0" expanded="true" />
-                <element signature="e#1854#1855#0" expanded="true" />
-                <element signature="e#1437#1937#0" expanded="true" />
-                <element signature="e#1936#1937#0" expanded="true" />
+                <element signature="e#1429#1956#0" expanded="true" />
+                <element signature="e#1955#1956#0" expanded="true" />
                 <element signature="method#EstablishConn#0;class#Receiver#0" />
-                <element signature="method#finReceive#0;class#Receiver#0" />
-                <element signature="e#5116#5168#0" />
                 <element signature="method#toDatagramPacket#0;class#Receiver#0" />
+                <element signature="method#writeInFile#0;class#Receiver#0" />
               </folding>
             </state>
           </provider>
@@ -103,7 +78,7 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Segment.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="413">
+            <state relative-caret-position="145">
               <caret line="127" selection-start-line="127" selection-end-line="127" />
               <folding>
                 <element signature="e#737#840#0" />
@@ -121,11 +96,10 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/Log.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="71">
-              <caret line="45" selection-start-line="45" selection-end-line="45" />
+            <state relative-caret-position="352">
+              <caret line="120" column="35" lean-forward="true" selection-start-line="120" selection-start-column="35" selection-end-line="120" selection-end-column="35" />
               <folding>
                 <element signature="imports" expanded="true" />
-                <element signature="e#2290#2329#0" />
               </folding>
             </state>
           </provider>
@@ -184,9 +158,11 @@
         <option value="$PROJECT_DIR$/sender_Log.txt" />
         <option value="$PROJECT_DIR$/receiver_Log.txt" />
         <option value="$PROJECT_DIR$/src/Segment.java" />
-        <option value="$PROJECT_DIR$/src/Log.java" />
-        <option value="$PROJECT_DIR$/src/Receiver.java" />
         <option value="$PROJECT_DIR$/Try/ThreadTry.java" />
+        <option value="$PROJECT_DIR$/receiver_Log1.txt" />
+        <option value="$PROJECT_DIR$/src/Log.java" />
+        <option value="$PROJECT_DIR$/sender_Log1.txt" />
+        <option value="$PROJECT_DIR$/src/Receiver.java" />
         <option value="$PROJECT_DIR$/src/Sender.java" />
       </list>
     </option>
@@ -207,37 +183,7 @@
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
     </navigator>
-    <panes>
-      <pane id="Scope" />
-      <pane id="PackagesPane" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="STP-base-on-UDP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="STP-base-on-UDP" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="STP-base-on-UDP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="STP-base-on-UDP" type="462c0819:PsiDirectoryNode" />
-              <item name="src" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="STP-base-on-UDP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="STP-base-on-UDP" type="462c0819:PsiDirectoryNode" />
-              <item name="Try" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="STP-base-on-UDP" type="b2602c69:ProjectViewProjectNode" />
-              <item name="STP-base-on-UDP" type="462c0819:PsiDirectoryNode" />
-              <item name="Try" type="462c0819:PsiDirectoryNode" />
-              <item name="UDP" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-    </panes>
+    <panes />
   </component>
   <component name="PropertiesComponent">
     <property name="Downloaded.Files.Path.Enabled" value="false" />
@@ -246,7 +192,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1559298202796" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1559328430969" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="Arquillian JUnit4" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.Arquillian JUnit4" value="" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -360,6 +306,7 @@
       <workItem from="1559112762409" duration="2294000" />
       <workItem from="1559116151380" duration="155000" />
       <workItem from="1559130562600" duration="39460000" />
+      <workItem from="1559309751388" duration="18207000" />
     </task>
     <task id="LOCAL-00001" summary="写 bug">
       <created>1559130584017</created>
@@ -372,7 +319,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="98540000" />
+    <option name="totallyTimeSpent" value="116747000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -385,6 +332,7 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
+    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.28540772" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -396,15 +344,15 @@
       <window_info anchor="bottom" id="Messages" order="0" weight="0.32961586" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32961586" />
-      <window_info anchor="bottom" id="Run" order="3" weight="0.32465923" />
-      <window_info anchor="bottom" id="Debug" order="4" weight="0.39900866" />
+      <window_info anchor="bottom" id="Run" order="3" weight="0.15613383" />
+      <window_info anchor="bottom" id="Debug" order="4" visible="true" weight="0.39900866" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="7" weight="0.32961586" />
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32961586" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.32961586" />
+      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32961586" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -417,7 +365,7 @@
       <window_info anchor="right" id="Database" order="8" weight="0.3297568" />
     </layout>
     <layout-to-restore>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.28540772" />
+      <window_info content_ui="combo" id="Project" order="0" weight="0.28540772" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Image Layers" order="2" />
       <window_info id="Designer" order="3" />
@@ -427,8 +375,8 @@
       <window_info anchor="bottom" id="Messages" order="0" weight="0.32961586" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32961586" />
-      <window_info anchor="bottom" id="Run" order="3" visible="true" weight="0.32465923" />
-      <window_info anchor="bottom" id="Debug" order="4" weight="0.39900866" />
+      <window_info anchor="bottom" id="Run" order="3" weight="0.15613383" />
+      <window_info active="true" anchor="bottom" id="Debug" order="4" visible="true" weight="0.39900866" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="7" weight="0.32961586" />
@@ -460,21 +408,51 @@
       <breakpoints>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/Receiver.java</url>
-          <line>92</line>
+          <line>211</line>
           <properties />
-          <option name="timeStamp" value="47" />
+          <option name="timeStamp" value="54" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Sender.java</url>
+          <line>450</line>
+          <properties />
+          <option name="timeStamp" value="94" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Sender.java</url>
+          <line>346</line>
+          <properties />
+          <option name="timeStamp" value="96" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Log.java</url>
+          <line>137</line>
+          <properties />
+          <option name="timeStamp" value="97" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Sender.java</url>
+          <line>340</line>
+          <properties />
+          <option name="timeStamp" value="98" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/src/Sender.java</url>
+          <line>339</line>
+          <properties />
+          <option name="timeStamp" value="99" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/Receiver.java</url>
-          <line>65</line>
+          <line>196</line>
           <properties />
-          <option name="timeStamp" value="48" />
+          <option name="timeStamp" value="100" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="java-line">
           <url>file://$PROJECT_DIR$/src/Receiver.java</url>
-          <line>68</line>
+          <line>195</line>
           <properties />
-          <option name="timeStamp" value="49" />
+          <option name="timeStamp" value="101" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -632,13 +610,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/sender.txt">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/sender.txt" />
     <entry file="file://$PROJECT_DIR$/src/Beginning.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="90">
@@ -654,12 +626,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/receiver.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/receiver">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/receiver.txt" />
+    <entry file="file://$PROJECT_DIR$/receiver" />
     <entry file="file://$PROJECT_DIR$/Try/TextOpreation/InputFileFlow.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="463">
@@ -667,9 +635,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/testfile1">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/testfile1" />
     <entry file="file://$PROJECT_DIR$/testFile.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="1577">
@@ -677,12 +643,8 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/receiver_Log.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/sender_Log.txt">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/receiver_Log.txt" />
+    <entry file="file://$PROJECT_DIR$/sender_Log.txt" />
     <entry file="file://$PROJECT_DIR$/Try/UDP/UdpClient.java">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="754">
@@ -703,9 +665,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/Try/NotifyTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="165">
+          <caret line="30" selection-start-line="30" selection-end-line="30" />
+          <folding>
+            <element signature="e#512#513#0" expanded="true" />
+            <element signature="e#547#548#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar:///Library/Java/JavaVirtualMachines/jdk1.8.0_201.jdk/Contents/Home/src.zip!/java/util/concurrent/CopyOnWriteArrayList.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="259">
+          <caret line="524" column="19" selection-start-line="524" selection-start-column="19" selection-end-line="524" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/Segment.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="413">
+        <state relative-caret-position="145">
           <caret line="127" selection-start-line="127" selection-end-line="127" />
           <folding>
             <element signature="e#737#840#0" />
@@ -721,87 +701,64 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/Log.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="71">
-          <caret line="45" selection-start-line="45" selection-end-line="45" />
+        <state relative-caret-position="352">
+          <caret line="120" column="35" lean-forward="true" selection-start-line="120" selection-start-column="35" selection-end-line="120" selection-end-column="35" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#2290#2329#0" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/Try/NotifyTest.java">
+    <entry file="file://$PROJECT_DIR$/src/Sender.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="30" selection-start-line="30" selection-end-line="30" />
-          <folding>
-            <element signature="e#512#513#0" expanded="true" />
-            <element signature="e#547#548#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/Receiver.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="178">
-          <caret line="74" column="17" lean-forward="true" selection-start-line="179" selection-start-column="24" selection-end-line="179" selection-end-column="32" />
+        <state relative-caret-position="-2755">
+          <caret line="63" column="32" lean-forward="true" selection-start-line="63" selection-start-column="32" selection-end-line="63" selection-end-column="32" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="e#1429#1855#0" expanded="true" />
-            <element signature="e#1854#1855#0" expanded="true" />
-            <element signature="e#1437#1937#0" expanded="true" />
-            <element signature="e#1936#1937#0" expanded="true" />
-            <element signature="method#EstablishConn#0;class#Receiver#0" />
-            <element signature="method#finReceive#0;class#Receiver#0" />
-            <element signature="e#5116#5168#0" />
-            <element signature="method#toDatagramPacket#0;class#Receiver#0" />
+            <element signature="method#PacketContent#0;class#Sender#0" />
+            <element signature="docComment;field#sendSocket#0;class#Sender#0" />
+            <element signature="e#4418#5728#0" expanded="true" />
+            <element signature="e#5727#5728#0" expanded="true" />
+            <element signature="e#5764#7430#0" expanded="true" />
+            <element signature="e#6775#6776#0" expanded="true" />
+            <element signature="e#6854#6855#0" expanded="true" />
+            <element signature="e#7429#7430#0" expanded="true" />
+            <element signature="e#7470#8759#0" expanded="true" />
+            <element signature="e#8758#8759#0" expanded="true" />
+            <element signature="method#EstablishConnection#0;class#Sender#0" />
+            <element signature="method#sendSegment#0;class#Sender#0" />
+            <element signature="method#sendSegmentWithPLD#0;class#Sender#0" />
+            <element signature="method#sendSegmentWithPLD#1;class#Sender#0" />
+            <element signature="method#receiveSegment#0;class#Sender#0" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/receiver_Log1.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="150">
-          <caret line="10" lean-forward="true" selection-start-line="10" selection-end-line="10" />
+        <state relative-caret-position="-1115">
+          <caret line="1" lean-forward="true" selection-start-line="1" selection-end-line="1" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/sender_Log1.txt">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="225">
-          <caret line="15" selection-start-line="15" selection-end-line="15" />
+        <state relative-caret-position="367">
+          <caret line="129" lean-forward="true" selection-start-line="129" selection-end-line="129" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/Sender.java">
+    <entry file="file://$PROJECT_DIR$/src/Receiver.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-425">
-          <caret line="193" column="47" selection-start-line="193" selection-start-column="47" selection-end-line="193" selection-end-column="47" />
+        <state relative-caret-position="123">
+          <caret line="201" column="65" lean-forward="true" selection-start-line="201" selection-start-column="65" selection-end-line="201" selection-end-column="65" />
           <folding>
             <element signature="imports" expanded="true" />
-            <element signature="method#getContent#0;class#Sender#0" />
-            <element signature="method#PacketContent#0;class#Sender#0" />
-            <element signature="e#2105#2140#0" />
-            <element signature="docComment;field#sendSocket#0;class#Sender#0" />
-            <element signature="e#4168#4212#0" />
-            <element signature="e#4417#5933#0" expanded="true" />
-            <element signature="e#6644#6664#0" />
-            <element signature="e#5932#5933#0" expanded="true" />
-            <element signature="e#5737#7001#0" expanded="true" />
-            <element signature="class#7391:7563" />
-            <element signature="e#6061#6062#0" expanded="true" />
-            <element signature="e#6140#6141#0" expanded="true" />
-            <element signature="e#7000#7001#0" expanded="true" />
-            <element signature="e#6497#8267#0" expanded="true" />
-            <element signature="e#8266#8267#0" expanded="true" />
-            <element signature="method#EstablishConnection#0;class#Sender#0" />
-            <element signature="method#finishSend#0;class#Sender#0" />
-            <element signature="method#sendSegment#0;class#Sender#0" />
-            <element signature="e#9643#9695#0" />
-            <element signature="method#sendSegmentWithPLD#0;class#Sender#0" />
-            <element signature="e#9219#9289#1" />
-            <element signature="method#receiveSegment#0;class#Sender#0" />
-            <element signature="method#toDatagramPacket#0;class#Sender#0" />
+            <element signature="e#1429#1956#0" expanded="true" />
+            <element signature="e#1955#1956#0" expanded="true" />
+            <element signature="method#EstablishConn#0;class#Receiver#0" />
+            <element signature="method#toDatagramPacket#0;class#Receiver#0" />
+            <element signature="method#writeInFile#0;class#Receiver#0" />
           </folding>
         </state>
       </provider>
