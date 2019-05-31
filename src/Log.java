@@ -40,6 +40,7 @@ public class Log {
         startTime = System.nanoTime();
         printWriter = new PrintWriter(fileName);
         printWriter.println("<snd/rcv/drop> <time> <type of packet> <seq-number> <number-of- bytes> <ack-number>");
+        printWriter.flush();
     }
 
 
@@ -47,23 +48,39 @@ public class Log {
     // TODO
     public void log(Segment segment, Type type, double time) {
         StringBuilder builder = new StringBuilder();
-        builder.append(type).append(" ");
-        builder.append(String.format("%.3f", (time - startTime) / 1000000.0)).append(" ");
+        builder.append(type).append("        ");
+        builder.append(String.format("%.3f", (time - startTime) / 1000000.0)).append("      ");
         String segType = "";
         if (segment.toString().length()>192) {
             segType = "D";
         }
         else if ("1".equals(segment.getFIN())) segType = "F";
         else if ("1".equals(segment.getSYN())) segType = "S";
-        if ((segment.toString().length() == 192) && !("0".equals(segment.getACK()))) {
+        if ( "1".equals(segment.getACK())) {
             segType += "A";
         }
-        builder.append(segType).append(" ");
-        builder.append(Integer.parseInt(segment.getSeq(),2)).append(" ");
-        builder.append(segment.getContent().length()).append(" ");
+        builder.append(segType).append("                   ");
+        builder.append(Integer.parseInt(segment.getSeq(),2)).append("                ");
+        builder.append(segment.getContent().length()).append("        ");
         builder.append(Integer.parseInt(segment.getAck(),2));
 
         printWriter.println(builder.toString());
+//        if (printWriter.checkError())
+//        {
+//            try
+//            {
+//                printWriter.println(builder.toString());
+//                if (printWriter.checkError())
+//                {
+//                    System.out.println("日志重建异常！data:" + builder.toString());
+//                }
+//            }
+//            catch (Exception e){}
+//        }
+        printWriter.flush();
+
+        System.out.println(builder.toString());
+
 
         switch (type) {
             case SND:

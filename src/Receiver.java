@@ -1,26 +1,31 @@
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Receiver {
 
-    private String receiver_port;
+
 
     private String file_name;
 
-    public Receiver(String receiver_port, String file_name) {
-        this.receiver_port = receiver_port;
+    public Receiver(int receiver_port, String file_name) {
+        this.Receiver_port = receiver_port;
         this.file_name = file_name;
     }
 
 
-    static InetAddress ip;
+    //接收方的ip
+    private InetAddress ip;
 
-    static {
+    {
         try {
             ip = InetAddress.getLocalHost();
         } catch (UnknownHostException e) {
@@ -28,33 +33,70 @@ public class Receiver {
         }
     }
 
-    static int port = 12365;
+    //接收方的port
+    private int Receiver_port = 2222;
 
-
-    private int ConnectionState = 0;
+    private int Sender_port = 1111;
 
     private boolean isReceiving = true;
 
-    private boolean isSending = false;
+    private boolean isSending = true;
 
 
-    //在收到信息之后，接收方可以根据发送方的相关信息得到发送方的Address。
-    private SocketAddress sendAddress ;
 
 
     private DatagramSocket getSocket;
     {
         try {
-            getSocket = new DatagramSocket(port, ip);
+            getSocket = new DatagramSocket(Receiver_port, ip);
         } catch (SocketException e) {
             e.printStackTrace();
         }
     }
 
+    private Log logger = new Log("receiver_Log1.txt", false);
 
-    private ArrayList<Segment> receivedSegment = new ArrayList<>();
+    private CopyOnWriteArrayList<Segment> receivedSegment = new CopyOnWriteArrayList<>();
 
-    private ArrayList<String> toBeACKed = new ArrayList<>();
+    private CopyOnWriteArrayList<String> toBeACKed = new CopyOnWriteArrayList<>();
+
+    Thread SendACK = new Thread(){
+        @Override
+        public void run() {
+            while (isSending) {
+                if (toBeACKed.size() != 0) {
+                    for (String AckString : toBeACKed) {
+                        Segment AckSegment = new Segment();
+                        AckSegment.setAck(AckString);
+                        AckSegment.setACK("1");
+                        toBeACKed.remove(AckString);
+                        sendSegment(AckSegment);
+                    }
+                }
+            }
+        }
+    };
+
+
+    Thread ReceiveSegment = new Thread(){
+
+        @Override
+        public void run() {
+            while (isReceiving) {
+                Segment segment = receiveSegment();
+                synchronized (currentThread()) {
+                    if ("1".equals(segment.getFIN())){
+                        isReceiving = false;
+                        break;
+                    }
+                    receivedSegment.add(segment);
+                    toBeACKed.add(segment.getSeq());
+
+                }
+            }
+        }
+    };
+
 
 
 
@@ -64,6 +106,7 @@ public class Receiver {
     public void EstablishConn(){
         // 确定接受方的IP和端口号，IP地址为本地机器地址
         try {
+            logger.start();
 
             //接收第一次握手，并对发送端进行第二次握手
             byte[] buf = new byte[192];
@@ -72,7 +115,6 @@ public class Receiver {
             String getMes = new String(buf, 0, getPacket.getLength());
             Segment segment = new Segment();
             segment.Parsing_Message(getMes);
-            this.sendAddress= getPacket.getSocketAddress();
             Segment SecondShack = segment;
 
 //            SecondShack.show_Details(SecondShack);
@@ -83,14 +125,14 @@ public class Receiver {
             }
 
             SecondShack.setACK("1");
-            //ack = x+1
+            //ack = x+1Receiver_port
             SecondShack.ack_Equals_Seq_Plus_One();
 
             SecondShack.setSeq(34);
             String feedback = SecondShack.toString();
             byte[] backBuf = feedback.getBytes();
             // 创建发送类型的数据报
-            DatagramPacket sendPacket = new DatagramPacket(backBuf, backBuf.length, sendAddress);
+            DatagramPacket sendPacket = new DatagramPacket(backBuf, backBuf.length, ip,Sender_port);
             // 通过套接字发送数据
             getSocket.send(sendPacket);
 
@@ -122,52 +164,56 @@ public class Receiver {
             e.printStackTrace();
         }
 
-        this.ConnectionState = 1;
+        //确认握手之后，正式建立连接
+        this.isReceiving = true;
+        this.isSending = true;
 
     }
-
-
-
-
-    Thread ReceiveSegment = new Thread(){
-        @Override
-        public void run() {
-            Segment segment = receiveSegment();
-            while (isReceiving) {
-                receivedSegment.add(segment);
-                toBeACKed.add(segment.getSeq());
-            }
-        }
-    };
-
-    Thread SendACK = new Thread(){
-        @Override
-        public void run() {
-            for(String AckString : toBeACKed){
-                Segment AckSegment = new Segment();
-                AckSegment.setAck(AckString);
-                byte[] AckSegmentBytes = AckSegment.toString().getBytes();
-                DatagramPacket AckSegmentPacket = new DatagramPacket(AckSegmentBytes,AckSegmentBytes.length,ip,port);
-                try {
-                    getSocket.send(AckSegmentPacket);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    };
-
 
     //开辟线程池
     public void receiveData() {
         ExecutorService executorService = Executors.newFixedThreadPool(2);
+        ReceiveSegment.setPriority(1);
+        SendACK.setPriority(2);
         executorService.execute(ReceiveSegment);
         executorService.execute(SendACK);
         executorService.shutdown();
         while (!executorService.isTerminated()) ;
     }
 
+    //四次握手松开连接
+    public void finReceive(){
+        this.isReceiving = false;
+        this.isSending = false;
+        Segment segment0 = receiveSegment();
+        Segment segment1 = new Segment();
+        segment1.setACK("1");
+        segment1.setSeq(233);
+        segment1.setAck(Integer.parseInt(segment0.getSeq(),1)+1);
+        sendSegment(segment1);
+        Segment segment2 = new Segment();
+        segment2.setACK("1");
+        segment2.setFIN("1");
+        segment2.setSeq(666);
+        segment2.setAck(Integer.parseInt(segment0.getSeq(),1)+1);
+        Segment segment3 = receiveSegment();
+    }
 
+
+
+    public void sendSegment(Segment Acksegment){
+        long timestamp = System.nanoTime();
+        Acksegment.setTime(String.valueOf(timestamp));
+            try {
+                getSocket.send(toDatagramPacket(Acksegment,ip, Sender_port));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            logger.log(Acksegment, Log.Type.SND, timestamp);
+
+
+
+    }
 
     public Segment receiveSegment(){
         //事先开辟一个足够大的数组
@@ -178,34 +224,44 @@ public class Receiver {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        long timestamp = System.nanoTime();
         String StringSegment = new String(receiveSegment);
-
         //采取自动截断功能，去除后面的空数组
         Segment segment = new Segment(StringSegment);
         int segmentLength = Integer.parseInt(segment.getData_offset());
         Segment trueSegment = new Segment(StringSegment.substring(0,segmentLength));
+
+        logger.log(trueSegment, Log.Type.RCV, timestamp);
         return trueSegment;
     }
 
+    public DatagramPacket toDatagramPacket(Segment segment, InetAddress address, int port) throws IOException {
+        byte[] array = segment.toString().getBytes();
+        return new DatagramPacket(array, array.length, address, port);
+    }
 
-
-    public String SegmentHandle(){
-        Collections.sort(receivedSegment);
-        //取出每一个报文中携带的Text文本
-        String result = "";
-        for (Segment segment:receivedSegment){
-            result += segment.getContent();
+    public void writeInFile(String file_name){
+        PrintWriter printWriter = null;
+        try {
+            printWriter = new PrintWriter(file_name);
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
         }
-        return result;
+        Collections.sort(receivedSegment);
+        for (Segment segment : receivedSegment){
+            printWriter.print(segment.getContent());
+        }
+        printWriter.close();
     }
 
 
-
     public static void main(String[] args) {
-        Receiver receiver = new Receiver("1","1");
+        Receiver receiver = new Receiver(1,"1");
         receiver.EstablishConn();
         receiver.receiveData();
+        receiver.finReceive();
 
+        receiver.writeInFile("receivedText");
 
         String receiveText = "";
         for (Segment segment:receiver.receivedSegment){

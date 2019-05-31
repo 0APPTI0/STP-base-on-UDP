@@ -1,13 +1,16 @@
 import java.io.*;
 import java.net.*;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Sender {
-    private InetAddress receiver_host_ip = InetAddress.getLocalHost();
+    private InetAddress ip = InetAddress.getLocalHost();
 
-    private int receiver_port;
+    private int Sender_port = 1111;
+
+    private int Receive_port;
 
     private String fileName;
 
@@ -26,13 +29,13 @@ public class Sender {
     private long seed;
 
 
-    private  Log logger = new Log("sender_Log.txt", true);
+    private  Log logger = new Log("sender_Log1.txt", true);
 
     //滑动窗口的起始位置
     public int startPoint = 0;
 
     //滑动窗口的结束边界
-    public int endPoint = startPoint + this.MWS;
+    public int endPoint = 0;
 
     //滑动窗口 下一个带发送报文位置的指针
     private int sendPoint = 0;
@@ -43,15 +46,11 @@ public class Sender {
     //包装好的Segment 的list
     ArrayList<Segment> ContentList;
 
-    /**系统状态
-     * 0 表示断开连接
-     * 1 表示建立连接
-     */
-    private int ConnectionState = 0;
+    private boolean isReceiving = true;
 
-    private boolean isReceiving = false;
+    private boolean isSending = true;
 
-    private boolean isSending = false;
+    private boolean allDone = false;
 
     private Random random;
 
@@ -119,20 +118,130 @@ public class Sender {
     private DatagramSocket sendSocket;
     {
         try {
-            sendSocket = new DatagramSocket(/*12341*/);
+            sendSocket = new DatagramSocket(Sender_port,ip);
         } catch (SocketException e) {
             e.printStackTrace();
         }
     }
 
 
+    private CopyOnWriteArrayList<Integer> toBeAcked = new CopyOnWriteArrayList<>();
+
+    private CopyOnWriteArrayList<Segment> toBeAcked_Segment_list = new CopyOnWriteArrayList<>();
+
+    private HashMap<Integer,Segment> toBeAcked_Segment = new HashMap<>();
+
+    private Thread SendSegment = new Thread(){
+        @Override
+        public void run() {
+            while (isSending) {
+                //TODO: 判断整个文件是否发送结束
+//            if (sendPoint == ContentList.size()){
+//                sendSocket.close();
+//                return;
+//            }
+                Segment toBeTransported = ContentList.get(sendPoint);
+                synchronized (currentThread()) {
+                    sendPoint += 1;
+                    //TODO 如果达到了滑动窗口的最大值，那么应该休眠一段时间；等接收的线程收到ACK继续往前推进
+                    if (sendPoint >= endPoint) {
+//                        try {
+//                            currentThread().wait();
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        try {
+//                            Thread.sleep(1000);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+                    }
+                    else {
+                        sendSegmentWithPLD(toBeTransported);
+                        toBeAcked.add(Integer.parseInt(toBeTransported.getSeq()));
+                        toBeAcked_Segment_list.add(toBeTransported);
+                        toBeAcked_Segment.put(Integer.parseInt(toBeTransported.getSeq()), toBeTransported);
+                    }
+                    if (sendPoint == ContentList.size()){
+                        isSending = false;
+                    }
+                }
+            }
+        }
+    };
+
+
+    private Thread ReceiveAck = new Thread(){
+        @Override
+        public void run() {
+            while (isReceiving && !interrupted()) {
+
+                Segment AckSegment = receiveSegment();
+
+                synchronized (currentThread()) {
+                    toBeAcked.remove(Integer.parseInt(AckSegment.getAck(), 2));
+                    toBeAcked_Segment_list.remove(toBeAcked_Segment.get(Integer.parseInt(AckSegment.getAck(), 2)));
+                    toBeAcked_Segment.remove(Integer.parseInt(AckSegment.getAck(), 2));
+                    toBeAcked.sort(new Comparator<Integer>() {
+                        @Override
+                        public int compare(Integer o1, Integer o2) {
+                            return 01 > o2 ? 1 : -1;
+                        }
+                    });
+                    if (toBeAcked.get(0) > startPoint) {
+                        startPoint = toBeAcked.get(0);
+
+                        //TODO 滑动窗口向前滑动，归还线程使用权
+                        //currentThread().notify();
+                    }
+                    endPoint = (startPoint + MWS > ContentList.size()) ? (startPoint + MWS) : ContentList.size();
+                    if (toBeAcked.size() == 0){
+                        isReceiving = false;
+                        isSending = false;
+                        allDone = true;
+                    }
+                }
+            }
+        }
+    };
+
+
+
+    private Thread ReSendSegment = new Thread(){
+        @Override
+        public void run() {
+
+            while (isReceiving) {
+                if (toBeAcked.size() != 0){
+                    synchronized (currentThread()) {
+                        //不断检查所有待收到ACK的报文是否已经收到ACK
+                        for (Segment segment : toBeAcked_Segment_list){
+                            if ((System.nanoTime() - Long.parseLong(segment.getTime())) / 1000000 > timeout){
+                                try {
+                                    sendSegmentWithPLD(segment, Log.AdditionalType.RETRANS);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+                else if (allDone) {
+                    isReceiving = false; ReceiveAck.interrupt();
+                    isSending = false;
+                }
+            }
+
+        }
+    };
+
+
     private void EstablishConnection(){
         try {
             logger.start();
 
-            // 确定发送方的IP地址及端口号，地址为本地机器地址
-            int port = receiver_port;
-            InetAddress ip = receiver_host_ip;
 
 
             //发出第一次握手请求
@@ -145,7 +254,7 @@ public class Sender {
 
             byte[] FirstBuffer = FirstSegment.toString().getBytes();
             // 构造数据报包，用来将长度为 length 的包发送到指定主机上的指定端口号
-            DatagramPacket sendPacket = new DatagramPacket(FirstBuffer, FirstBuffer.length, ip, port);
+            DatagramPacket sendPacket = new DatagramPacket(FirstBuffer, FirstBuffer.length, ip, Receive_port);
             // 通过套接字发送数据,发送第一次握手
             sendSocket.send(sendPacket);
 
@@ -177,7 +286,7 @@ public class Sender {
             LastSegment.setAck(tempAck);
             //发送第三次握手的报文
             byte[] LastSegmentBytes = LastSegment.toString().getBytes();
-            DatagramPacket sendLastPacket = new DatagramPacket(LastSegmentBytes, LastSegmentBytes.length, ip, port);
+            DatagramPacket sendLastPacket = new DatagramPacket(LastSegmentBytes, LastSegmentBytes.length, ip, Receive_port);
             sendSocket.send(sendLastPacket);
 
 //            LastSegment.show_Details(LastSegment);
@@ -192,73 +301,6 @@ public class Sender {
         this.isReceiving = false;
     }
 
-
-    private ArrayList<Integer> toBeAcked = new ArrayList<>();
-
-    private Thread SendSegment = new Thread(){
-        @Override
-        public void run() {
-            while (isSending) {
-                //TODO: 判断整个文件是否发送结束
-//            if (sendPoint == ContentList.size()){
-//                sendSocket.close();
-//                return;
-//            }
-                Segment toBeTransported = ContentList.get(sendPoint);
-                synchronized (currentThread()) {
-                    sendPoint += 1;
-                    //TODO 需要改用滑动窗口来进行判读
-                    if (sendPoint == ContentList.size()) {
-                        isSending = false;
-                    }
-                    sendSegmentWithPLD(toBeTransported);
-                    toBeAcked.add(Integer.parseInt(toBeTransported.getSeq()));
-                }
-            }
-        }
-    };
-
-
-    private Thread ReceiveAck = new Thread(){
-        @Override
-        public void run() {
-            while (isReceiving && !interrupted()) {
-
-                Segment AckSegment = receiveSegment();
-
-                synchronized (currentThread()) {
-                    toBeAcked.remove(Integer.parseInt(AckSegment.getAck(), 2));
-
-                    toBeAcked.sort(new Comparator<Integer>() {
-                        @Override
-                        public int compare(Integer o1, Integer o2) {
-                            return 01 > o2 ? 1 : -1;
-                        }
-                    });
-                    startPoint = toBeAcked.get(0);
-                    endPoint = (startPoint + MWS > ContentList.size()) ? (startPoint + MWS) : ContentList.size();
-
-                    //TODO 测试滑动窗口是否已经失效
-                }
-            }
-        }
-    };
-
-
-
-    private Thread ReSendSegment = new Thread(){
-        @Override
-        public void run() {
-
-            while (isReceiving) {
-                // TODO
-                if (!isSending) {isReceiving = false; ReceiveAck.interrupt();}
-            }
-
-        }
-    };
-
-
     private void send() {
         ExecutorService executorService = Executors.newFixedThreadPool(3);
         executorService.execute(SendSegment);
@@ -268,11 +310,34 @@ public class Sender {
         while (!executorService.isTerminated());
     }
 
-
     private void finishSend(){
-
+        this.isReceiving = false;
+        this.isSending = false;
+        Segment segment0 = new Segment();
+        segment0.setFIN("1");
+        segment0.setSeq(67);
+        sendSegment(segment0);
+        Segment finSegment1 = receiveSegment();
+        Segment finSegment2 = receiveSegment();
+        Segment segment1 = new Segment();
+        segment1.setACK("1");
+        segment1.setSeq(Integer.parseInt(segment0.getSeq(),2)+1);
+        segment1.setAck(Integer.parseInt(finSegment2.getSeq(),2)+1);
+        sendSegment(segment1);
     }
 
+
+
+    public void sendSegment(Segment segment){
+        long timestamp = System.nanoTime();
+        segment.setTime(String.valueOf(timestamp));
+        try {
+            sendSocket.send(toDatagramPacket(segment,ip, Receive_port));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        logger.log(segment, Log.Type.SND, timestamp);
+    }
 
     public void sendSegmentWithPLD(Segment segment){
         long timestamp = System.nanoTime();
@@ -281,7 +346,7 @@ public class Sender {
         if (/*random.nextDouble() > pdrop*/
                 true) {
             try {
-                sendSocket.send(toDatagramPacket(segment,receiver_host_ip, receiver_port));
+                sendSocket.send(toDatagramPacket(segment,ip, Receive_port));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -292,7 +357,19 @@ public class Sender {
 
     }
 
-
+    private void sendSegmentWithPLD(Segment segment, Log.AdditionalType type) throws IOException {
+        long timestamp = System.nanoTime();
+        segment.setTime(String.valueOf(timestamp));
+        if (random.nextDouble() > pdrop) {
+            sendSocket.send(toDatagramPacket(segment,ip,this.Receive_port));
+            toBeAcked.add(Integer.parseInt(segment.getSeq(),2));
+            toBeAcked_Segment_list.add(segment);
+            toBeAcked_Segment.put(Integer.parseInt(segment.getSeq(),2),segment);
+            logger.log(segment, Log.Type.SND, type, timestamp);
+        } else {
+            logger.log(segment, Log.Type.DROP, type, timestamp);
+        }
+    }
 
     public Segment receiveSegment(){
         //事先开辟一个足够大的数组
@@ -314,21 +391,20 @@ public class Sender {
         return trueSegment;
     }
 
-
     public DatagramPacket toDatagramPacket(Segment segment, InetAddress address, int port) throws IOException {
         byte[] array = segment.toString().getBytes();
         return new DatagramPacket(array, array.length, address, port);
     }
 
 
-
     //构造方法
     public Sender(/*String receiver_host_ip,*/ int receiver_port, String fileName, int mws, int mss, double timeout, double pdrop, long seed) throws UnknownHostException {
         //this.receiver_host_ip = receiver_host_ip;
-        this.receiver_port = receiver_port;
+        this.Receive_port = receiver_port;
         this.fileName = fileName;
         MWS = mws;
         MSS = mss;
+        this.endPoint = this.startPoint + MWS;
         this.timeout = timeout;
         this.pdrop = pdrop;
         this.seed = seed;
@@ -338,7 +414,7 @@ public class Sender {
     public static void main(String[] args) throws IOException {
         Sender sender = null;
         try {
-            sender = new Sender(12365,"testFile.txt",10,256,1.0,0.5,2);
+            sender = new Sender(2222,"testFile.txt",5,192+512,1.0,0.5,2);
             sender.random = new Random(sender.seed);
             if (sender.MSS>1024){
                 System.out.println("MSS太大");
@@ -351,6 +427,7 @@ public class Sender {
         sender.ContentList = sender.PacketContent();
         sender.EstablishConnection();
         sender.send();
+        sender.finishSend();
 
         sender.logger.close();
 

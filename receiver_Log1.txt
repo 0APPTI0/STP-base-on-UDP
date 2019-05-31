@@ -1,0 +1,10 @@
+<snd/rcv/drop> <time> <type of packet> <seq-number> <number-of- bytes> <ack-number>
+RCV        1289.537      D                   0                512        0
+SND        1315.599      A                   0                0        0
+RCV        1321.401      D                   1                512        0
+RCV        1321.793      D                   2                512        0
+SND        1321.836      A                   0                0        1
+RCV        1322.074      D                   3                512        0
+SND        1322.130      A                   0                0        2
+SND        1322.369      A                   0                0        3
+RCV        6336.455      F                   67                0        0

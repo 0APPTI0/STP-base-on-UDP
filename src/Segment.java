@@ -5,7 +5,7 @@ public class Segment implements Comparable<Segment>{
     private String ack = "00000000000000000000000000000000";
 
     //数据偏移字段,存放报文的长度
-    private String Data_offset = "00000000";
+    private String Data_offset = "00000192";
 
     //若为ACK报文，则该值为1，否则为0
     private String ACK = "0";
@@ -123,6 +123,7 @@ public class Segment implements Comparable<Segment>{
 
     //-------------------------------getter & setter------------------------------------//
 
+
     public String getSeq() {
         return seq;
     }
@@ -153,6 +154,11 @@ public class Segment implements Comparable<Segment>{
 
     public void setData_offset(String data_offset) {
         Data_offset = data_offset;
+    }
+
+    public void setData_offset(int data_offset) {
+        String Data_offset = Auto_completion(String.valueOf(data_offset),8);
+        this.setData_offset(Data_offset);
     }
 
     public String getACK() {
