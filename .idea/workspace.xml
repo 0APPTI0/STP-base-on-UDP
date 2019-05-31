@@ -2,25 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="fca34fd5-2518-443e-9129-6fd10ffeaed9" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Try/NotifyTest.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Log$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Log$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Log.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Log.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Receiver$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Receiver$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Receiver$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Receiver$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Receiver.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Receiver.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Segment.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Segment.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Sender$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Sender$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Sender$2$1.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Sender$2$1.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Sender$2.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Sender$2.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Sender$3.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Sender$3.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/out/production/Code/Sender.class" beforeDir="false" afterPath="$PROJECT_DIR$/out/production/Code/Sender.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sender_Log.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Log.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Log.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Receiver.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Receiver.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Segment.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Segment.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Sender.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/Sender.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testfile1" beforeDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/out/" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -264,7 +246,7 @@
     <property name="Repository.Attach.Sources" value="false" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1559238085030" />
+    <property name="com.android.tools.idea.instantapp.provision.ProvisionBeforeRunTaskProvider.myTimeStamp" value="1559298202796" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="Arquillian JUnit4" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrarySuperClass.Arquillian JUnit4" value="" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
@@ -377,7 +359,7 @@
       <workItem from="1559061023190" duration="22000" />
       <workItem from="1559112762409" duration="2294000" />
       <workItem from="1559116151380" duration="155000" />
-      <workItem from="1559130562600" duration="39436000" />
+      <workItem from="1559130562600" duration="39460000" />
     </task>
     <task id="LOCAL-00001" summary="写 bug">
       <created>1559130584017</created>
@@ -390,7 +372,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="98516000" />
+    <option name="totallyTimeSpent" value="98540000" />
   </component>
   <component name="TodoView">
     <todo-panel id="selected-file">
@@ -403,7 +385,6 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1440" height="900" extended-state="0" />
-    <editor active="true" />
     <layout>
       <window_info content_ui="combo" id="Project" order="0" weight="0.28540772" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
@@ -415,7 +396,7 @@
       <window_info anchor="bottom" id="Messages" order="0" weight="0.32961586" />
       <window_info anchor="bottom" id="Message" order="1" />
       <window_info anchor="bottom" id="Find" order="2" weight="0.32961586" />
-      <window_info active="true" anchor="bottom" id="Run" order="3" visible="true" weight="0.32465923" />
+      <window_info anchor="bottom" id="Run" order="3" weight="0.32465923" />
       <window_info anchor="bottom" id="Debug" order="4" weight="0.39900866" />
       <window_info anchor="bottom" id="Cvs" order="5" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="6" weight="0.4" />
@@ -423,7 +404,7 @@
       <window_info anchor="bottom" id="Docker" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="9" weight="0.32961586" />
       <window_info anchor="bottom" id="Database Changes" order="10" />
-      <window_info anchor="bottom" id="Terminal" order="11" weight="0.32961586" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.32961586" />
       <window_info anchor="bottom" id="Event Log" order="12" side_tool="true" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
