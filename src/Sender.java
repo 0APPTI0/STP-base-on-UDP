@@ -124,38 +124,36 @@ public class Sender {
         public void run() {
             while (isSending && ! interrupted()) {
 
-                Segment toBeTransported = ContentList.get(sendPoint);
-                synchronized (currentThread()) {
+                if (sendPoint < ContentList.size()) {
+                    Segment toBeTransported = ContentList.get(sendPoint);
+                    synchronized (currentThread()) {
+                        //TODO 如果达到了滑动窗口的最大值，那么应该休眠一段时间；等接收的线程收到ACK,让滑动窗口继续往前推进
+                        if (sendPoint <= endPoint) {
 
-
-                    sendPoint += 1;
-                    if (sendPoint == ContentList.size()){
-                        isSending = false;
-                    }
-                    //TODO 如果达到了滑动窗口的最大值，那么应该休眠一段时间；等接收的线程收到ACK,让滑动窗口继续往前推进
-                    if (sendPoint > endPoint) {
-//                        try {
-//                            currentThread().wait();
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                        try {
-//                            Thread.sleep(5000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-                        sendPoint -= 1;
-                        continue;
-                    }
-                    else {
-                        try {
-                            sendSegmentWithPLD(toBeTransported);
-                        } catch (IOException e) {
+                            try {
+                                sendSegmentWithPLD(toBeTransported);
+                                sendPoint += 1;
+                            } catch (IOException e) {
                             e.printStackTrace();
                         }
-
+                        }
+                        else {
+                            try {
+                                Thread.sleep(2000);
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                            continue;
+                        }
                     }
                 }
+
+
+                if (sendPoint == ContentList.size() && startPoint == endPoint) {
+                    isSending = false;
+                    SendSegment.interrupt();
+                }
+
             }
         }
     };
@@ -174,7 +172,7 @@ public class Sender {
                     for (Segment segment:toBeAcked_Segment_list){
                         if (segment.getSeq().equals(AckSegment.getAck())){
                             toBeAcked_Segment_list.remove(segment);
-                        }endPoint = (startPoint + MWS > ContentList.size()) ? ContentList.size():(startPoint + MWS)  ;
+                        }endPoint = (startPoint + MWS > ContentList.size()-1) ? ContentList.size()-1:(startPoint + MWS)  ;
                     }
 
                     toBeAcked_Segment.remove(Integer.parseInt(AckSegment.getAck(), 2));
@@ -188,7 +186,7 @@ public class Sender {
 
                     if (toBeAcked.size()!=0 && toBeAcked.get(0) > startPoint) {
                         startPoint = toBeAcked.get(0);
-                        endPoint = (startPoint + MWS > ContentList.size()) ? ContentList.size():(startPoint + MWS)  ;
+                        endPoint = (startPoint + MWS > ContentList.size()-1) ? (ContentList.size()-1):(startPoint + MWS)  ;
                         //TODO 滑动窗口向前滑动，归还线程使用权
 //                        currentThread().notifyAll();
                     }
@@ -197,6 +195,8 @@ public class Sender {
                         isReceiving = false;
                         ReceiveAck.interrupt();
                     }
+
+                    System.out.println("StartPoint: "+startPoint+"          "+"SendPoint: "+sendPoint+"         "+"EndPoint: "+endPoint);
                 }
             }
         }
@@ -425,7 +425,7 @@ public class Sender {
     public static void main(String[] args) throws IOException {
         Sender sender = null;
         try {
-            sender = new Sender(2222,"testFile.txt",5,192+512,2000.0,0.5,2);
+            sender = new Sender(2222,"testFile.txt",4,192+512,2000.0,0.5,2);
             sender.random = new Random(sender.seed);
             if (sender.MSS>1024){
                 System.out.println("MSS太大");
@@ -434,6 +434,7 @@ public class Sender {
             e.printStackTrace();
         }
         sender.TextContent = sender.readFile(sender.fileName);
+
 
         sender.ContentList = sender.PacketContent();
         sender.EstablishConnection();

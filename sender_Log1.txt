@@ -1,18 +1,33 @@
 <snd/rcv/drop> <time> <type of packet> <seq-number> <number-of- bytes> <ack-number>
-SND        8.690      D                   0                512        0
-RCV        41.748      A                   0                0        0
-SND        50.485      D                   1                512        0
-DROP        50.975      D                   2                512        0
-SND        51.206      D                   3                512        0
-SND        51.554      D                   4                512        0
-SND        52.144      D                   5                512        0
-RCV        53.138      A                   0                0        1
-RCV        53.405      A                   0                0        3
-RCV        53.745      A                   0                0        4
-RCV        54.061      A                   0                0        5
-DROP        54.555      D                   6                512        0
-DROP        3021.942      D                   2                512        0
-SND        3022.199      D                   6                512        0
-RCV        3022.697      A                   0                0        6
-SND        4024.318      D                   2                512        0
-RCV        4024.909      A                   0                0        2
+RCV        30.229      A                   0                0        0
+SND        7.743      D                   0                512        0
+SND        38.779      D                   1                512        0
+DROP        39.094      D                   2                512        0
+SND        39.316      D                   3                512        0
+SND        39.600      D                   4                512        0
+RCV        40.364      A                   0                0        1
+RCV        40.664      A                   0                0        3
+RCV        40.951      A                   0                0        4
+SND        2044.444      D                   5                512        0
+DROP        2045.373      D                   6                512        0
+RCV        2045.749      A                   0                0        5
+DROP        3021.277      D                   2                512        0
+SND        4026.649      D                   2                512        0
+RCV        4027.147      A                   0                0        2
+SND        4048.527      D                   7                512        0
+DROP        4048.745      D                   8                77        0
+RCV        4048.971      A                   0                0        7
+SND        5030.065      D                   6                512        0
+RCV        5030.620      A                   0                0        6
+SND        7034.107      D                   8                77        0
+RCV        7034.582      A                   0                0        8
+SND        8035.795      F                   67                0        0
+RCV        8036.393      A                   0                0        67
+RCV        8036.955      FA                   666                0        68
+SND        8037.199      A                   68                0        667
+===================================
+Amount of (original) Data Transferred (in bytes): 5901
+Number of Data Segments Sent (excluding retransmissions): 9
+Number of (all) Packets Dropped (by the PLD module): 4
+Number of Retransmitted Segments: 4
+Number of Duplicate Acknowledgements received: 0
