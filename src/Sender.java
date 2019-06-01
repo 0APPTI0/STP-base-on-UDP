@@ -44,7 +44,7 @@ public class Sender {
     byte[] TextContent;
 
     //包装好的Segment 的list
-    ArrayList<Segment> ContentList;
+    CopyOnWriteArrayList<Segment> ContentList;
 
     private boolean isReceiving = true;
 
@@ -66,22 +66,9 @@ public class Sender {
     }
 
     //将文件内容按照MSS，计算出每一个报文能够携带的文件内容长度，并且将它们塞进ArrayList<Segment> ContentList里
-    public ArrayList<Segment> PacketContent(){
-        ArrayList<Segment> result = new ArrayList<>();
+    public CopyOnWriteArrayList<Segment> PacketContent(){
+        CopyOnWriteArrayList<Segment> result = new CopyOnWriteArrayList<>();
         int contentInSegment = MSS - 192;
-//        String tempContentString;
-//        //如果整个要发送的内容只需要一个报文就可以装下
-//        if (TextContent.length <= contentInSegment){
-//            tempContentString = new String(TextContent);
-//            Segment segment = new Segment();
-//            segment.setSeq(1);
-//            segment.setContent(tempContentString);
-//            segment.setData_offset(segment.Auto_completion(Integer.toBinaryString(segment.toString().length()),8));
-//            result.add(segment);
-//            return result;
-//        }
-        //分成很多个报文装
-            //一个指针，指向待包装的数据的位置
         int point = 0;
         int Complete_Segment_Num = TextContent.length / contentInSegment;
         int i;
@@ -157,6 +144,7 @@ public class Sender {
 //                        } catch (InterruptedException e) {
 //                            e.printStackTrace();
 //                        }
+                        sendPoint -= 1;
                         continue;
                     }
                     else {
@@ -196,6 +184,8 @@ public class Sender {
                             return o1 > o2 ? 1 : -1;
                         }
                     });
+
+
                     if (toBeAcked.size()!=0 && toBeAcked.get(0) > startPoint) {
                         startPoint = toBeAcked.get(0);
                         endPoint = (startPoint + MWS > ContentList.size()) ? ContentList.size():(startPoint + MWS)  ;
@@ -331,13 +321,14 @@ public class Sender {
 
     }
 
-    private void finishSend(){
+    private void finishSend() throws InterruptedException {
         this.isSending = false;
         this.isReceiving = false;
         Segment segment0 = new Segment();
         segment0.setFIN("1");
         segment0.setSeq(67);
         sendSegment(segment0);
+
         Segment finSegment1 = receiveSegment();
         Segment finSegment2 = receiveSegment();
         Segment segment1 = new Segment();
@@ -351,7 +342,7 @@ public class Sender {
 
     public void sendSegment(Segment segment){
         long timestamp = System.nanoTime();
-        segment.setTime(String.valueOf(timestamp));
+        segment.setTime(segment.Auto_completion(String.valueOf(timestamp),64));
         try {
             sendSocket.send(toDatagramPacket(segment,ip, Receive_port));
         } catch (IOException e) {
@@ -362,7 +353,7 @@ public class Sender {
 
     public void sendSegmentWithPLD(Segment segment) throws IOException {
         long timestamp = System.nanoTime();
-        segment.setTime(String.valueOf(timestamp));
+        segment.setTime(segment.Auto_completion(String.valueOf(timestamp),64));
         if (!toBeAcked.contains(Integer.parseInt(segment.getSeq(),2))) {
             toBeAcked.add(Integer.parseInt(segment.getSeq(), 2));
             toBeAcked_Segment_list.add(segment);
@@ -434,7 +425,7 @@ public class Sender {
     public static void main(String[] args) throws IOException {
         Sender sender = null;
         try {
-            sender = new Sender(2222,"testFile.txt",10,192+512,2000.0,0.5,2);
+            sender = new Sender(2222,"testFile.txt",5,192+512,2000.0,0.5,2);
             sender.random = new Random(sender.seed);
             if (sender.MSS>1024){
                 System.out.println("MSS太大");
@@ -447,7 +438,11 @@ public class Sender {
         sender.ContentList = sender.PacketContent();
         sender.EstablishConnection();
         sender.send();
-        sender.finishSend();
+        try {
+            sender.finishSend();
+        } catch (InterruptedException e) {
+                e.printStackTrace();
+        }
         sender.logger.close();
 
     }

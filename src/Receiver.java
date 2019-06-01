@@ -43,7 +43,7 @@ public class Receiver {
     private boolean isSending = true;
 
 
-
+    private String lastAckNum;
 
     private DatagramSocket getSocket;
     {
@@ -64,6 +64,10 @@ public class Receiver {
         @Override
         public void run() {
             while (isSending && ! interrupted()) {
+                if (toBeACKed.size() == 0 && !isReceiving){
+                    isSending = false;
+                    SendACK.interrupt();
+                }
                 if (toBeACKed.size() != 0) {
                     for (String AckString : toBeACKed) {
                         Segment AckSegment = new Segment();
@@ -85,13 +89,15 @@ public class Receiver {
             while (isReceiving && ! interrupted()) {
                 Segment segment = receiveSegment();
                 synchronized (currentThread()) {
-                    if ("1".equals(segment.getFIN())){
-                        isReceiving = false;
-                        break;
+                    if (!toBeACKed.contains(segment.getSeq())) {
+                        receivedSegment.add(segment);
                     }
-                    receivedSegment.add(segment);
                     toBeACKed.add(segment.getSeq());
-
+                    if ("1".equals(segment.getFIN())){
+                        lastAckNum = segment.getSeq();
+                        isReceiving = false;
+                        ReceiveSegment.interrupt();
+                    }
                 }
             }
         }
@@ -183,23 +189,13 @@ public class Receiver {
 
     //四次握手松开连接
     public void finReceive(){
-        this.isReceiving = false;
-        this.isSending = false;
-        this.ReceiveSegment.interrupt();
-        this.SendACK.interrupt();
-
-
-        Segment segment0 = receiveSegment();
-        Segment segment1 = new Segment();
-        segment1.setACK("1");
-        segment1.setSeq(233);
-        segment1.setAck(Integer.parseInt(segment0.getSeq(),1)+1);
-        sendSegment(segment1);
+        System.out.println("---");
         Segment segment2 = new Segment();
         segment2.setACK("1");
         segment2.setFIN("1");
         segment2.setSeq(666);
-        segment2.setAck(Integer.parseInt(segment0.getSeq(),1)+1);
+        segment2.setAck(Integer.parseInt(lastAckNum,2)+1);
+        sendSegment(segment2);
         Segment segment3 = receiveSegment();
     }
 
@@ -251,8 +247,11 @@ public class Receiver {
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
+        //把最后一个FIN报文删除
+        receivedSegment.remove(receivedSegment.size()-1);
         Collections.sort(receivedSegment);
-        for (Segment segment : receivedSegment){
+        for (int i = 0 ; i < receivedSegment.size() ; i ++){
+            Segment segment = receivedSegment.get(i);
             printWriter.print(segment.getContent());
         }
         printWriter.close();

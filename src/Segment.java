@@ -114,7 +114,7 @@ public class Segment implements Comparable<Segment>{
      */
     @Override
     public int compareTo(Segment o) {
-        return Integer.parseInt(this.getSeq())>Integer.parseInt(o.getSeq()) ? 1:-1;
+        return Integer.parseInt(this.getSeq(),2)>Integer.parseInt(o.getSeq(),2) ? 1:-1;
     }
 
 
